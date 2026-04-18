@@ -171,7 +171,7 @@
     for (let i = 1; i <= frameCount; i++) {
       const img = new Image();
       const frameNum = i.toString().padStart(3, '0');
-      img.src = `public/sequence/ezgif-frame-${frameNum}.jpg`;
+      img.src = `ezgif-frame-${frameNum}.jpg`;
       img.onload = () => {
         loadedCount++;
         if (loadedCount === 1) render(); // Show first frame immediately
