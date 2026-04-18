@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jewellabs.ai | Digitization for Jewellers</title>
+  <meta name="description" content="High-leverage digitization layer for legacy jewelry businesses. Websites, AI agents, Compliance." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="cursor-glow"></div>
+  <!-- ─── NAVBAR ─── -->
+  <nav class="nav" id="navbar">
+    <div class="nav__wrapper">
+      <a href="#" class="nav__brand">
+        <svg class="nav__logo" viewBox="0 0 16 16"><polygon points="8,1 15,8 8,15 1,8" fill="none" stroke="currentColor" stroke-width="1.1"/><polygon points="8,4 12,8 8,12 4,8" fill="currentColor" opacity=".3"/></svg>
+        <span class="nav__brand-text">JEWELLABS AI</span>
+      </a>
+
+      <div class="nav__links">
+        <a href="#platform" class="nav__link">Vision</a>
+        <a href="#solutions" class="nav__link">Studio</a>
+        <button class="nav__link nav__link--btn" id="nav-services-btn">Services</button>
+      </div>
+
+      <div class="nav__cta">
+        <button class="nav__btn" id="nav-book-btn">Book a Demo</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── MAIN ─── -->
+  <main class="main">
+    <canvas id="flares-canvas" style="position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;"></canvas>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <canvas id="hero-canvas"></canvas>
+      <div class="hero__glow"></div>
+      <div class="hero__overlay-lr"></div>
+      <div class="hero__overlay-bt"></div>
+
+      <div class="hero__content anim-fade-up" data-anim="fade-up" data-delay="200">
+        <div class="hero__tag">
+          <span class="hero__tag-line"></span>
+          <p class="hero__tag-text">Private Infrastructure</p>
+        </div>
+
+        <h1 class="hero__title">
+          Create your first AI workflow<br/>
+          <em class="hero__title-em">Digitalize your vision</em>
+        </h1>
+        <p class="hero__subtitle">Type a sentence. Get a photorealistic HD render, full manufacturing specs, E2E workflow, and polished marketing copy</p>
+      </div>
+
+      <div class="hero__actions anim-fade-up" data-anim="fade-up" data-delay="500">
+        <button class="btn btn--primary" id="hero-open-studio">Open the Studio</button>
+        <button  onclick="window.open('https://vltavax.vercel.app/')" class="btn btn--outline" id="hero-demo-render">svg render (watch it work)</button>
+      </div>
+
+      <div class="hero__stats anim-fade-up" data-anim="fade-up" data-delay="800">
+        <div class="hero__stat">
+          <span class="hero__stat-value">4,800+</span>
+          <span class="hero__stat-label">Pieces Rendered</span>
+        </div>
+        <div class="hero__stat-divider"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-value">1024px</span>
+          <span class="hero__stat-label">HD Output</span>
+        </div>
+        <div class="hero__stat-divider"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-value">In 12s</span>
+          <span class="hero__stat-label">Render</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="platform">
+      <div class="features__header">
+        <p class="section-tag">✦ Core Infrastructure</p>
+        <h2 class="section-heading">We build the tech.<br/><em class="gold-em">You run the brand.</em></h2>
+        <p class="section-sub">Your team focuses on design and clients. We deploy the infrastructure that handles everything else.</p>
+      </div>
+
+      <div class="features__grid">
+        <!-- Card 1 -->
+        <article class="feature-card anim-fade-up" data-anim="fade-up">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="square"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </div>
+          <h3 class="feature-card__title">Design Integration</h3>
+          <p class="feature-card__desc">Prompt-to-render architecture. Generate high-fidelity product renderings and asset blueprints instantly without CAD dependencies.</p>
+        </article>
+        <!-- Card 2 -->
+        <article class="feature-card anim-fade-up" data-anim="fade-up" data-delay="100">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="square"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+          </div>
+          <h3 class="feature-card__title">Autonomous Operations</h3>
+          <p class="feature-card__desc">Stream inbound telephony through advanced TTS. Instantly extracts request heuristics and handles secure client routing.</p>
+        </article>
+        <!-- Card 3 -->
+        <article class="feature-card anim-fade-up" data-anim="fade-up" data-delay="200">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="square"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <h3 class="feature-card__title">Regulatory Safety</h3>
+          <p class="feature-card__desc">Mandatory G7 compliance automated via robust OCR. Generates legally enforceable statements programmatically.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE STUDIO -->
+    <section class="interactive-studio" id="solutions">
+      <div class="interactive-studio__header">
+        <p class="section-tag">✦ LIVE OPERATIONS</p>
+        <h3 class="section-heading">The Studio.</h3>
+      </div>
+      
+      <div class="interactive-studio__container" id="studio-container">
+        <div class="liquid-stage__bg" id="heroStage" aria-hidden="true" style="position: absolute; inset: 0;"></div>
+        <!-- Dynamic string connections -->
+        <svg class="interactive-studio__svg" id="studio-svg"></svg>
+
+        <button class="callout callout--tl" data-target="websites" style="top:16%;left:8%" aria-label="Learn about bespoke websites">
+          <span class="callout__label">BESPOKE<br/>STOREFRONT</span>
+        </button>
+
+        <button class="callout callout--tr" data-target="voice" style="top:22%;right:10%" aria-label="Learn about AI voice agents">
+          <span class="callout__label">AI VOICE<br/>AGENTS</span>
+        </button>
+
+        <button class="callout callout--ml" data-target="dds" style="top:52%;left:6%" aria-label="Learn about G7 DDS compliance">
+          <span class="callout__label">G7 / EU<br/>DDS ENGINE</span>
+        </button>
+
+        <button class="callout callout--mr" data-target="design" style="top:55%;right:7%" aria-label="Learn about unlimited design">
+          <span class="callout__label">PRIVATE<br/>DESIGN AI</span>
+        </button>
+
+        <aside class="detail-dock glass" id="detailDock" aria-live="polite">
+          <div class="detail-dock__inner" id="detailDockInner">
+            <p class="detail-dock__eyebrow">Module</p>
+            <h3 class="detail-dock__title">Hover a callout</h3>
+            <p class="detail-dock__body">Glide the cursor across the piece to inspect.</p>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-it-works" id="process">
+      <div class="how-it-works__header anim-fade-up" data-anim="fade-up">
+        <p class="section-tag">✦ HOW IT WORKS</p>
+        <h2 class="section-heading">Four steps.<br/><em class="gold-em">One build.</em></h2>
+      </div>
+
+      <div class="how-it-works__grid anim-fade-up" data-anim="fade-up" data-delay="200">
+        <div class="step-col">
+          <span class="step-num">01</span>
+          <h4 class="step-title">Discovery</h4>
+          <p class="step-desc">A working call. We map the surface of your business. The calls, the invoices, the designs, the bottlenecks.</p>
+        </div>
+        <div class="step-col">
+          <span class="step-num">02</span>
+          <h4 class="step-title">Blueprint</h4>
+          <p class="step-desc">A written specification. Every service, every integration, every legal obligation scoped before a line is shipped.</p>
+        </div>
+        <div class="step-col">
+          <span class="step-num">03</span>
+          <h4 class="step-title">Deployment</h4>
+          <p class="step-desc">Website first, then agents, then compliance, then design. Weeks, not quarters. On your own private infrastructure.</p>
+        </div>
+        <div class="step-col">
+          <span class="step-num">04</span>
+          <h4 class="step-title">Operate</h4>
+          <p class="step-desc">Maintenance, uptime, iteration. One point of contact. One monthly statement. One trusted partner.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer__inner">
+        <div class="footer__border-top"></div>
+
+        <div class="footer__links">
+          <div>
+            <h4 class="footer__heading">Pages</h4>
+            <div class="footer__link-row">
+              <a href="#" class="footer__link">Home</a>
+              <button class="footer__link footer__link--btn" id="footer-pricing-btn">Pricing</button>
+              <a href="https://cal.com/soham-jariwala-4fvbkw/15min" target="_blank" rel="noopener noreferrer" class="footer__link">Contact</a>
+            </div>
+          </div>
+          <div class="footer__legal">
+            <h4 class="footer__heading">Legal</h4>
+            <div class="footer__link-row">
+              <span class="footer__link footer__link--static">Privacy</span>
+              <span class="footer__link footer__link--static">Terms</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer__bottom-border"></div>
+        <div class="footer__bottom">
+          <span class="footer__copy">Jewellabs.ai 2026</span>
+          <div class="footer__socials">
+            <a href="https://www.linkedin.com/in/soham-jariwala-18297520a" target="_blank" rel="noopener noreferrer" class="footer__social" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="footer__social" aria-label="X">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ═══════════  BOOK DEMO MODAL  ═══════════ -->
+  <div class="modal-overlay" id="book-demo-modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-content--book">
+      <!-- Left Column -->
+      <div class="modal-book__left">
+        <p class="section-tag">✦ For Businesses</p>
+        <h2 class="modal-book__heading">We build the tech.<br/><em class="gold-em-italic">You run the brand.</em></h2>
+        <p class="modal-book__sub">Your team focuses on design and clients. We deploy the infrastructure that handles everything else: operations, comms, inventory, marketing. Trained on your voice, running 24/7.</p>
+
+        <div class="modal-book__features">
+          <div class="modal-book__feature">
+            <span class="modal-book__emoji" style="color: var(--gold);"><svg viewBox="0 0 40 40" width="22" height="22"><path d="M20 6 v18" stroke="currentColor" stroke-width="1.2"/><rect x="16" y="6" width="8" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M10 20 a10 10 0 0 0 20 0 M14 34 h12" stroke="currentColor" stroke-width="1.2" fill="none"/></svg></span>
+            <div>
+              <h4 class="modal-book__feature-title">Autonomous Ops</h4>
+              <p class="modal-book__feature-desc">Agents handle enquiries, follow-ups, order tracking, supplier comms. You review a summary each morning. That's it.</p>
+            </div>
+          </div>
+          <div class="modal-book__feature">
+            <span class="modal-book__emoji" style="color: var(--gold);"><svg viewBox="0 0 40 40" width="22" height="22"><rect x="5" y="8" width="30" height="24" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M5 14 h30" stroke="currentColor" stroke-width="1.2"/><circle cx="9" cy="11" r="0.8" fill="currentColor"/><circle cx="12" cy="11" r="0.8" fill="currentColor"/></svg></span>
+            <div>
+              <h4 class="modal-book__feature-title">Luxury Digital Presence</h4>
+              <p class="modal-book__feature-desc">Not a template. Bespoke e-commerce with 3D product viewers, ring configurators, booking flows. Built only for jewellers.</p>
+            </div>
+          </div>
+          <div class="modal-book__feature">
+            <span class="modal-book__emoji" style="color: var(--gold);"><svg viewBox="0 0 40 40" width="22" height="22"><polygon points="20,4 34,14 28,34 12,34 6,14" fill="none" stroke="currentColor" stroke-width="1.2"/><polygon points="20,14 26,18 24,28 16,28 14,18" fill="currentColor" opacity="0.25"/></svg></span>
+            <div>
+              <h4 class="modal-book__feature-title">Private Design Engine</h4>
+              <p class="modal-book__feature-desc">Your own model, trained on your collections. New SKUs, client renders, photorealistic proofs. All before touching metal.</p>
+            </div>
+          </div>
+          <div class="modal-book__feature">
+            <span class="modal-book__emoji" style="color: var(--gold);"><svg viewBox="0 0 40 40" width="22" height="22"><path d="M10 6 h16 l6 6 v22 a2 2 0 0 1 -2 2 h-20 a2 2 0 0 1 -2 -2 v-26 a2 2 0 0 1 2 -2 z" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M26 6 v6 h6" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M14 22 h12 M14 27 h12 M14 32 h8" stroke="currentColor" stroke-width="1"/></svg></span>
+            <div>
+              <h4 class="modal-book__feature-title">Intelligence Layer</h4>
+              <p class="modal-book__feature-desc">Inventory forecasting, pricing, trend analysis, multi-channel marketing. Scoped exactly to what your maison needs.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="modal-book__right">
+        <div class="modal-book__card">
+          <button class="modal-close" id="book-demo-close">✕</button>
+          <p class="section-tag">Pricing</p>
+          <h3 class="modal-book__card-heading">Custom-scoped</h3>
+          <p class="modal-book__card-sub">No fixed tiers. You pay for what you use.</p>
+
+          <div class="modal-book__checklist">
+            <div class="modal-book__check"><span class="check-icon">✓</span><span>Dedicated onboarding</span></div>
+            <div class="modal-book__check"><span class="check-icon">✓</span><span>Custom model training</span></div>
+            <div class="modal-book__check"><span class="check-icon">✓</span><span>White-glove integration</span></div>
+            <div class="modal-book__check"><span class="check-icon">✓</span><span>Ongoing support</span></div>
+            <div class="modal-book__check"><span class="check-icon">✓</span><span>NDA + full data ownership</span></div>
+            <div class="modal-book__check"><span class="check-icon">✓</span><span>Binance/Stripe/Mercury Backed</span></div>
+          </div>
+
+          <a href="https://cal.com/soham-jariwala-4fvbkw/15min" target="_blank" rel="noopener noreferrer" class="btn btn--primary btn--full">Book 15-min Call →</a>
+          <p class="modal-book__free-note">Free, no commitment</p>
+
+          <div class="modal-book__quote">
+            <p class="modal-book__quote-text">"The gap between thinking a piece and holding it has never been this small."</p>
+            <p class="modal-book__quote-author">Jewellabs.ai</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════  SERVICES MODAL  ═══════════ -->
+  <div class="modal-overlay" id="services-modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-content--services">
+      <button class="modal-close modal-close--float" id="services-close">✕</button>
+
+      <div class="services-grid" id="services-grid">
+        <!-- cards injected by JS -->
+      </div>
+
+      <div class="services-cta">
+        <a href="https://cal.com/soham-jariwala-4fvbkw/15min" target="_blank" rel="noopener noreferrer" class="btn btn--primary">Book 15-min Call →</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
