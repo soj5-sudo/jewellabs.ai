@@ -210,27 +210,35 @@
       let currentDrawFrame = 30; // Start slightly advanced to settle smoothly on load
       let mouseX = 0;
       let isHovering = false;
+      // Tilt state (device orientation) — smoothed so casual holding is neutral
+      let tiltFraction = 0;
+      let tiltBaselineGamma = null;
+      let hasTilt = false;
       const heroEl = document.getElementById('hero');
+      const isTouch = window.matchMedia('(pointer: coarse)').matches;
 
       function updateTarget() {
         const scrollTop = window.pageYOffset;
         const maxScroll = window.innerHeight;
         const scrollFraction = Math.min(Math.max(scrollTop / maxScroll, 0), 1);
-        
+
         let hoverFraction = 0;
         if (isHovering && scrollFraction < 1) {
           // Use mouse X position to scrub the animation
           hoverFraction = mouseX / window.innerWidth;
         }
 
-        // Use the maximum of scroll or hover fraction
-        const finalFraction = Math.min(Math.max(scrollFraction, hoverFraction), 1);
+        // Combine scroll, hover, and tilt — take the max so any input can drive it
+        const finalFraction = Math.min(
+          Math.max(scrollFraction, hoverFraction, hasTilt ? tiltFraction : 0),
+          1
+        );
         targetFrame = finalFraction * (frameCount - 1);
       }
 
       // Listen to scroll
       window.addEventListener('scroll', updateTarget, { passive: true });
-      
+
       // Listen to mouse movement over the hero section
       if (heroEl) {
         heroEl.addEventListener('mousemove', (e) => {
@@ -238,28 +246,65 @@
           mouseX = e.clientX;
           updateTarget();
         }, { passive: true });
-        
+
         heroEl.addEventListener('mouseleave', () => {
           isHovering = false;
           updateTarget();
         }, { passive: true });
       }
 
-      // Smooth render loop (RAF)
+      // ── Device tilt support (phone) ──
+      // gamma = left/right tilt in degrees (-90..90). Used to scrub the explosion.
+      function handleOrientation(e) {
+        if (e.gamma == null) return;
+        hasTilt = true;
+
+        // Auto-calibrate baseline so "holding naturally" = 0
+        if (tiltBaselineGamma == null) tiltBaselineGamma = e.gamma;
+
+        const delta = e.gamma - tiltBaselineGamma;
+        // Map +/- 35 deg of tilt to full 0..1 range
+        const normalized = Math.min(Math.max((delta + 35) / 70, 0), 1);
+        // Smooth tilt so it feels liquid, not jittery
+        tiltFraction = tiltFraction + (normalized - tiltFraction) * 0.12;
+        updateTarget();
+      }
+
+      function attachTilt() {
+        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+      }
+
+      // iOS 13+ requires explicit permission. Ask on first touch/click.
+      if (isTouch && typeof DeviceOrientationEvent !== 'undefined') {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          const requestOnce = () => {
+            DeviceOrientationEvent.requestPermission()
+              .then((state) => { if (state === 'granted') attachTilt(); })
+              .catch(() => {});
+            window.removeEventListener('touchend', requestOnce);
+            window.removeEventListener('click', requestOnce);
+          };
+          window.addEventListener('touchend', requestOnce, { once: true, passive: true });
+          window.addEventListener('click', requestOnce, { once: true, passive: true });
+        } else {
+          attachTilt();
+        }
+      }
+
+      // Smooth render loop (RAF) — slower, more cinematic lerp for that "flowwy" feel
       function tick() {
-        // Interpolate current frame towards target frame (lerp)
-        // 0.05 factor for slower, more cinematic motion
-        currentDrawFrame += (targetFrame - currentDrawFrame) * 0.05; 
-        
+        // 0.025 = ~half the previous speed → slow, precise, flowy
+        currentDrawFrame += (targetFrame - currentDrawFrame) * 0.025;
+
         const frameIndex = Math.min(Math.max(Math.round(currentDrawFrame), 0), frameCount - 1);
-        
+
         if (sequence.frame !== frameIndex) {
           sequence.frame = frameIndex;
           render();
         }
         requestAnimationFrame(tick);
       }
-      
+
       // Initial trigger
       updateTarget();
       tick();
@@ -426,21 +471,21 @@
       const rect = stage.getBoundingClientRect();
       const nx = (globalMouseX - rect.left) / rect.width;
       const ny = (globalMouseY - rect.top) / rect.height;
-      
-      // User interaction scaling: slightly more responsive for "maximum user interaction"
-      state.targetX = (ny - 0.5) * 2.0; 
-      state.targetY = (nx - 0.5) * 3.0; 
-      state.x = lerp(state.x, state.targetX, 0.08);
-      state.y = lerp(state.y, state.targetY, 0.08);
+
+      // Slower, liquid lerp (0.04) — was 0.08. Precise and flowy.
+      state.targetX = (ny - 0.5) * 2.0;
+      state.targetY = (nx - 0.5) * 3.0;
+      state.x = lerp(state.x, state.targetX, 0.04);
+      state.y = lerp(state.y, state.targetY, 0.04);
 
       diamondGroup.rotation.x = state.x;
-      diamondGroup.rotation.y = state.y + performance.now() * 0.0002;
+      diamondGroup.rotation.y = state.y + performance.now() * 0.00012;
 
       inner.rotation.x = -state.x * 2;
-      inner.rotation.y = -state.y * 2 + performance.now() * 0.0005;
+      inner.rotation.y = -state.y * 2 + performance.now() * 0.0003;
 
-      particles.rotation.y += 0.0008;
-      particles.rotation.x += 0.0003;
+      particles.rotation.y += 0.0005;
+      particles.rotation.x += 0.0002;
 
       keyLight.position.x = 4 + (nx - 0.5) * 4;
       keyLight.position.y = 3 - (ny - 0.5) * 4;
@@ -586,8 +631,8 @@
         x: Math.random() * width,
         y: Math.random() * height,
         r: (1 + Math.random() * 2) * (window.devicePixelRatio || 1),
-        vx: (Math.random() - 0.5) * 0.2,
-        vy: -0.1 - Math.random() * 0.2,
+        vx: (Math.random() - 0.5) * 0.12,
+        vy: -0.05 - Math.random() * 0.12,
         baseO: 0.1 + Math.random() * 0.4,
         o: 0,
       });
@@ -632,14 +677,26 @@
     drawBG();
   }
 
-  // ── Cursor Glow Animation ──
+  // ── Cursor Glow Animation (smoothed for liquid follow) ──
   const cursorGlow = document.getElementById('cursor-glow');
+  let cgTargetX = window.innerWidth / 2;
+  let cgTargetY = window.innerHeight / 2;
+  let cgX = cgTargetX;
+  let cgY = cgTargetY;
   window.addEventListener('mousemove', (e) => {
-    if (cursorGlow) {
-      cursorGlow.style.left = e.clientX + 'px';
-      cursorGlow.style.top = e.clientY + 'px';
-    }
+    cgTargetX = e.clientX;
+    cgTargetY = e.clientY;
   }, { passive: true });
+  function cursorTick() {
+    cgX += (cgTargetX - cgX) * 0.12;
+    cgY += (cgTargetY - cgY) * 0.12;
+    if (cursorGlow) {
+      cursorGlow.style.left = cgX + 'px';
+      cursorGlow.style.top = cgY + 'px';
+    }
+    requestAnimationFrame(cursorTick);
+  }
+  if (cursorGlow) cursorTick();
 
   // ── Init ──
   if (typeof renderServiceCards === 'function') {
