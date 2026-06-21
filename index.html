@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#050506" />
+  <title>Jewellabs — AI Infrastructure to Restructure the Diamond Industry</title>
+  <meta name="description" content="Jewellabs is the AI infrastructure layer restructuring the diamond and jewelry industry — compliance workflows, AI voice, bespoke storefronts, and a private design studio." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=15" />
+</head>
+<body>
+  <!-- ─── STAGE: gold particles (logo → 3D spin → floating word) ─── -->
+  <canvas id="stage-canvas" aria-hidden="true"></canvas>
+  <div id="intro" aria-hidden="true">
+    <span class="intro__label">Jewellabs&nbsp;AI</span>
+  </div>
+
+  <!-- ─── AMBIENT LAYERS ─── -->
+  <div class="grid-bg" aria-hidden="true"></div>
+  <canvas id="flares-canvas" aria-hidden="true"></canvas>
+  <div id="cursor-glow" aria-hidden="true"></div>
+
+  <!-- ─── NAVBAR ─── -->
+  <nav class="nav" id="navbar">
+    <div class="nav__wrapper">
+      <a href="#top" class="nav__brand">
+        <svg class="nav__logo" viewBox="0 0 16 16"><polygon points="8,1 15,8 8,15 1,8" fill="none" stroke="currentColor" stroke-width="1.1"/><polygon points="8,4 12,8 8,12 4,8" fill="currentColor" opacity=".35"/></svg>
+        <span class="nav__brand-text">JEWELLABS</span>
+      </a>
+
+      <div class="nav__links">
+        <a href="#platform" class="nav__link">Platform</a>
+        <a href="#compliance" class="nav__link">Compliance</a>
+        <a href="#studio" class="nav__link">Studio</a>
+        <a href="#team" class="nav__link">Team</a>
+      </div>
+
+      <div class="nav__cta">
+        <a href="https://cal.com/soham-jariwala-4fvbkw/15min" target="_blank" rel="noopener noreferrer" class="btn btn--ghost btn--sm">Book a Demo</a>
+        <a href="https://vltavax.vercel.app/" target="_blank" rel="noopener noreferrer" class="btn btn--primary btn--sm">Try the Studio</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main" id="top">
+
+    <!-- ─── HERO ─── -->
+    <section class="hero" id="hero">
+      <!-- necklace explosion centerpiece -->
+      <canvas id="hero-canvas" aria-hidden="true"></canvas>
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="hero__vignette" aria-hidden="true"></div>
+
+      <div class="hero__inner">
+        <div class="hero__content" data-anim="fade-up" data-delay="120">
+          <!-- floating gold particle word renders here (stage canvas) -->
+          <div class="hero__headline" id="hero-headline">
+            <svg class="hero__watermark" viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1">
+              <polygon points="50,8 86,40 50,92 14,40"/>
+              <polyline points="14,40 50,30 86,40"/>
+              <line x1="50" y1="8" x2="50" y2="30"/>
+              <line x1="50" y1="30" x2="50" y2="92"/>
+              <line x1="32" y1="35" x2="50" y2="92"/>
+              <line x1="68" y1="35" x2="50" y2="92"/>
+              <line x1="14" y1="40" x2="50" y2="92"/>
+              <line x1="86" y1="40" x2="50" y2="92"/>
+            </svg>
+            <h1 class="sr-only">Jewel Labs</h1>
+          </div>
+
+          <p class="hero__subtitle hero__subtitle--glass">AI infrastructure to restructure the diamond &amp; Jewelry trade.</p>
+
+          <div class="hero__actions">
+            <a href="https://vltavax.vercel.app/" target="_blank" rel="noopener noreferrer" class="btn btn--primary">Try the Studio →</a>
+            <a href="https://cal.com/soham-jariwala-4fvbkw/15min" target="_blank" rel="noopener noreferrer" class="btn btn--ghost">Book a Demo</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── BACKERS MARQUEE (koovai-style) ─── -->
+    <section class="marquee-section" aria-label="Backers">
+      <p class="marquee-eyebrow">Backed by Associates &amp; Angels from</p>
+      <div class="marquee">
+        <div class="marquee__track">
+          <span class="wm wm-serif">Cornell</span>
+          <span class="wm wm-sans">CMU</span>
+          <span class="wm wm-serif">Harvard</span>
+          <span class="wm wm-serif">Stanford</span>
+          <span class="wm wm-sans">G&nbsp;Fellows</span>
+          <span class="wm wm-serif">Georgia&nbsp;Tech</span>
+          <span class="wm wm-sans">Mercor</span>
+          <span class="wm wm-serif wm--forbes">Forbes</span>
+          <span class="wm wm-sans wm--a16z">Andreessen&nbsp;Horowitz</span>
+          <span class="wm wm-serif">Berkeley</span>
+          <span class="wm wm-serif" aria-hidden="true">Cornell</span>
+          <span class="wm wm-sans" aria-hidden="true">CMU</span>
+          <span class="wm wm-serif" aria-hidden="true">Harvard</span>
+          <span class="wm wm-serif" aria-hidden="true">Stanford</span>
+          <span class="wm wm-sans" aria-hidden="true">G&nbsp;Fellows</span>
+          <span class="wm wm-serif" aria-hidden="true">Georgia&nbsp;Tech</span>
+          <span class="wm wm-sans" aria-hidden="true">Mercor</span>
+          <span class="wm wm-serif wm--forbes" aria-hidden="true">Forbes</span>
+          <span class="wm wm-sans wm--a16z" aria-hidden="true">Andreessen&nbsp;Horowitz</span>
+          <span class="wm wm-serif" aria-hidden="true">Berkeley</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PLATFORM / PILLARS ─── -->
+    <section class="section" id="platform">
+      <div class="section__head" data-anim="fade-up">
+        <p class="eyebrow">The Platform</p>
+        <h2 class="section__title">One layer. Four systems.<br/><em>Built only for jewellers.</em></h2>
+        <p class="section__sub">No fragmented tools. A single private infrastructure that handles the work a modern maison can't do by hand.</p>
+      </div>
+
+      <div class="pillars">
+        <article class="card" data-anim="fade-up" data-delay="0">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="18" height="14" rx="1.5"/><path d="M3 8h18"/><circle cx="6" cy="6" r="0.6" fill="currentColor"/><circle cx="8.4" cy="6" r="0.6" fill="currentColor"/></svg>
+          </div>
+          <h3 class="card__title">Bespoke Storefronts</h3>
+          <p class="card__desc">Hand-built digital presences with 3D product viewers, ring configurators, and secure checkout — Stripe, PayPal, and crypto. Never a template.</p>
+        </article>
+
+        <article class="card" data-anim="fade-up" data-delay="80">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M8 21h8"/></svg>
+          </div>
+          <h3 class="card__title">AI Voice Agents</h3>
+          <p class="card__desc">Every inbound call answered. The agent qualifies the lead, captures intent, and drops a structured summary in your inbox. No call goes to voicemail.</p>
+        </article>
+
+        <article class="card" data-anim="fade-up" data-delay="160">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 13h6M10 16.5h6"/></svg>
+          </div>
+          <h3 class="card__title">G7 / EU DDS Engine</h3>
+          <p class="card__desc">Forward the invoice. We OCR the fields, validate against the framework, and return a signed Due Diligence Statement. Compliance without the paperwork.</p>
+        </article>
+
+        <article class="card" data-anim="fade-up" data-delay="240">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polygon points="12,3 20,9 17,20 7,20 4,9"/><polygon points="12,9 15,11 14,16 10,16 9,11" fill="currentColor" opacity=".2"/></svg>
+          </div>
+          <h3 class="card__title">Private Design AI</h3>
+          <p class="card__desc">Describe the piece. Receive a studio-grade render, full bench specs, and channel-ready copy. Trained on your archive — your IP never leaves your tenancy.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ─── COMPLIANCE SPOTLIGHT ─── -->
+    <section class="section" id="compliance">
+      <div class="spotlight">
+        <div class="spotlight__copy" data-anim="fade-up">
+          <p class="eyebrow">Compliance-first</p>
+          <h2 class="section__title">The G7 deadline is<br/><em>already here.</em></h2>
+          <p class="section__sub spotlight__lead">
+            From January 2026, every diamond over 0.5 carats entering G7 markets requires a
+            documented Due Diligence Statement. Most houses still do this by hand. We turn it
+            into a workflow: invoice in, signed PDF out, audit trail kept.
+          </p>
+          <ul class="spotlight__list">
+            <li><span class="tick">✓</span> Gmail / IMAP invoice ingestion</li>
+            <li><span class="tick">✓</span> OCR + field extraction &amp; validation</li>
+            <li><span class="tick">✓</span> Legally formatted DDS, generated every time</li>
+            <li><span class="tick">✓</span> Missing-data flags routed for human review</li>
+          </ul>
+          <a href="https://cal.com/soham-jariwala-4fvbkw/15min" target="_blank" rel="noopener noreferrer" class="btn btn--ghost">See it on a call →</a>
+        </div>
+
+        <div class="spotlight__panel glass" data-anim="fade-up" data-delay="160" aria-hidden="true">
+          <div class="dds-row dds-row--head">
+            <span>Due Diligence Statement</span>
+            <span class="dds-status">SIGNED</span>
+          </div>
+          <div class="dds-line"><span>Stone</span><span>Round Brilliant · 1.04ct</span></div>
+          <div class="dds-line"><span>Origin</span><span>Verified · G7 framework</span></div>
+          <div class="dds-line"><span>Invoice</span><span>#JL-20260114</span></div>
+          <div class="dds-line"><span>Extracted</span><span>12 / 12 fields</span></div>
+          <div class="dds-bar"><span class="dds-bar__fill"></span></div>
+          <div class="dds-foot">Generated in 1.8s · No manual entry</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── STUDIO ─── -->
+    <section class="section studio" id="studio">
+      <div class="studio__card" data-anim="fade-up">
+        <div class="studio__stage" id="heroStage" aria-hidden="true"></div>
+
+        <div class="studio__top">
+          <p class="eyebrow">Live Operations</p>
+          <h2 class="studio__title">Rebuild the house.</h2>
+        </div>
+
+        <div class="studio__bottom">
+          <a href="https://vltavax.vercel.app/" target="_blank" rel="noopener noreferrer" class="btn btn--primary">Try the Studio →</a>
+          <a href="https://cal.com/soham-jariwala-4fvbkw/15min" target="_blank" rel="noopener noreferrer" class="btn btn--ghost">Book a Demo</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PROCESS ─── -->
+    <section class="section" id="process">
+      <div class="section__head" data-anim="fade-up">
+        <p class="eyebrow">How it works</p>
+        <h2 class="section__title">Four steps.<br/><em>One build.</em></h2>
+      </div>
+
+      <div class="steps" data-anim="fade-up" data-delay="120">
+        <div class="step">
+          <span class="step__num">01</span>
+          <h4 class="step__title">Discovery</h4>
+          <p class="step__desc">A working call. We map the surface of your business — the calls, the invoices, the designs, the bottlenecks.</p>
+        </div>
+        <div class="step">
+          <span class="step__num">02</span>
+          <h4 class="step__title">Blueprint</h4>
+          <p class="step__desc">A written specification. Every service, integration, and legal obligation scoped before a line ships.</p>
+        </div>
+        <div class="step">
+          <span class="step__num">03</span>
+          <h4 class="step__title">Deployment</h4>
+          <p class="step__desc">Storefront, then agents, then compliance, then design. Weeks, not quarters — on your own private infrastructure.</p>
+        </div>
+        <div class="step">
+          <span class="step__num">04</span>
+          <h4 class="step__title">Operate</h4>
+          <p class="step__desc">Maintenance, uptime, iteration. One point of contact. One monthly statement. One trusted partner.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TEAM ─── -->
+    <section class="section" id="team">
+      <div class="section__head" data-anim="fade-up">
+        <p class="eyebrow">The Team</p>
+        <h2 class="section__title">Operators &amp; engineers<br/><em>building the layer.</em></h2>
+      </div>
+
+      <div class="team">
+        <article class="member" data-anim="fade-up" data-delay="0">
+          <span class="member__tag">Co-founder</span>
+          <span class="member__mono">SJ</span>
+          <h3 class="member__name">Soham Jariwala</h3>
+          <p class="member__role">Chief Executive Officer</p>
+          <p class="member__org">Cornell</p>
+        </article>
+        <article class="member" data-anim="fade-up" data-delay="60">
+          <span class="member__tag">Co-founder</span>
+          <span class="member__mono">AD</span>
+          <h3 class="member__name">Anik Dey</h3>
+          <p class="member__role">Chief Technology Officer</p>
+          <p class="member__org">Cornell · Georgia Tech</p>
+        </article>
+        <article class="member" data-anim="fade-up" data-delay="120">
+          <span class="member__tag">Co-founder</span>
+          <span class="member__mono">KW</span>
+          <h3 class="member__name">Khandaker Wasi</h3>
+          <p class="member__role">Chief Information Officer</p>
+          <p class="member__org">Cornell · Forbes 30u30</p>
+        </article>
+        <article class="member" data-anim="fade-up" data-delay="180">
+          <span class="member__mono">JL</span>
+          <h3 class="member__name">Jacob Lee</h3>
+          <p class="member__role">Founding Engineer</p>
+          <p class="member__org">Stanford</p>
+        </article>
+        <article class="member" data-anim="fade-up" data-delay="240">
+          <span class="member__mono">RV</span>
+          <h3 class="member__name">Ryan Verma</h3>
+          <p class="member__role">Founding Engineer</p>
+          <p class="member__org">Harvard</p>
+        </article>
+        <article class="member" data-anim="fade-up" data-delay="300">
+          <span class="member__mono">AK</span>
+          <h3 class="member__name">Aarush Khadokoori</h3>
+          <p class="member__role">GTM Engineer</p>
+          <p class="member__org">Carnegie Mellon</p>
+        </article>
+        <article class="member" data-anim="fade-up" data-delay="360">
+          <span class="member__mono">KP</span>
+          <h3 class="member__name">Krish Pai</h3>
+          <p class="member__role">Cybersecurity Lead &amp; CAIO</p>
+          <p class="member__org">Cornell</p>
+        </article>
+        <article class="member" data-anim="fade-up" data-delay="420">
+          <span class="member__mono">YP</span>
+          <h3 class="member__name">Yash Patil</h3>
+          <p class="member__role">Blockchain Advisor</p>
+          <p class="member__org">Berkeley</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ─── FOOTER ─── -->
+    <footer class="footer">
+      <div class="footer__inner">
+        <div class="footer__top">
+          <a href="#top" class="nav__brand">
+            <svg class="nav__logo" viewBox="0 0 16 16"><polygon points="8,1 15,8 8,15 1,8" fill="none" stroke="currentColor" stroke-width="1.1"/><polygon points="8,4 12,8 8,12 4,8" fill="currentColor" opacity=".35"/></svg>
+            <span class="nav__brand-text">JEWELLABS</span>
+          </a>
+          <div class="footer__links">
+            <a href="#platform" class="footer__link">Platform</a>
+            <a href="#compliance" class="footer__link">Compliance</a>
+            <a href="#studio" class="footer__link">Studio</a>
+            <a href="https://cal.com/soham-jariwala-4fvbkw/15min" target="_blank" rel="noopener noreferrer" class="footer__link">Contact</a>
+          </div>
+        </div>
+
+        <div class="footer__bottom">
+          <span class="footer__copy">© 2026 Jewellabs · AI Infrastructure for the Jewelry Trade</span>
+          <div class="footer__socials">
+            <a href="https://www.linkedin.com/in/soham-jariwala-18297520a" target="_blank" rel="noopener noreferrer" class="footer__social" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="footer__social" aria-label="X">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="app.js?v=15"></script>
+</body>
+</html>
