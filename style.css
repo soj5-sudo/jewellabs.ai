@@ -102,19 +102,18 @@ em { font-style: normal; }
   z-index: 9998;
   background: #000;
 }
-/* golden movie-title label — JS drives scale/letter-spacing/opacity */
+/* start-engine label — JS drives a left→right wipe reveal + opacity */
 .intro__label {
   position: absolute;
   bottom: 14%;
   left: 50%;
-  transform: translateX(-50%) scale(0.6);
-  transform-origin: center;
+  transform: translateX(-50%);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: clamp(15px, 2.1vw, 21px);
+  font-size: clamp(13px, 1.6vw, 16px);
   font-weight: 300;
-  letter-spacing: 0.16em;
-  color: #e8d49b;
-  text-shadow: 0 0 24px rgba(232, 212, 155, 0.35);
+  letter-spacing: 0.12em;
+  color: #e2dec6;
+  text-shadow: 0 0 22px rgba(226, 222, 198, 0.26);
   opacity: 0;
   white-space: nowrap;
 }
@@ -271,15 +270,7 @@ em { font-style: normal; }
   margin: 8px 0;
 }
 .hero__watermark {
-  position: absolute;
-  left: 30%; top: 6%;
-  width: clamp(260px, 33vw, 470px);
-  height: auto;
-  transform: translate(-50%, -50%);
-  color: #e8d49b;
-  opacity: 0.03;
-  pointer-events: none;
-  z-index: -1;
+  display: none; /* removed — not visible to the naked eye */
 }
 /* solid white headline — fades in once the particles settle */
 .hero__title-solid {
@@ -591,6 +582,8 @@ em { font-style: normal; }
   .hero__headline { width: 100%; height: clamp(60px, 15vw, 92px); }
   .hero__watermark { left: 34%; top: 6%; width: clamp(220px, 58vw, 320px); }
   .hero__subtitle { font-size: 15px; }
+  /* let the glass subtitle wrap into a neat rounded chip on phones (no overflow) */
+  .hero__subtitle--glass { max-width: 100%; border-radius: 16px; font-size: 13.5px; padding: 11px 16px; line-height: 1.5; }
   .hero__actions { width: 100%; }
   .hero__actions .btn { flex: 1 1 auto; }
   .section { padding: 80px 20px; }

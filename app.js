@@ -47,13 +47,51 @@
     var intro = qs('#intro');
     var label = qs('.intro__label');
     if (!canvas) return;
-    var ctx = canvas.getContext('2d');
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var W = 0, H = 0, scrollY = window.pageYOffset;
     var N = 0, parts = [], spin3D = [], mark2D = [], textPts = [], box = null, solidFS = 14;
 
+    // WebGL (karalabs-style GPU particles) with a 2D fallback
+    var useGL = (typeof THREE !== 'undefined');
+    var renderer, scene, camera, geo, posAttr, colAttr, posArr, colArr, points;
+    var ctx = useGL ? null : canvas.getContext('2d');
+
+    // thin 2D overlay just for the crisp solid word
+    var textCanvas = document.createElement('canvas');
+    textCanvas.setAttribute('aria-hidden', 'true');
+    textCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;';
+    document.body.appendChild(textCanvas);
+    var tctx = textCanvas.getContext('2d');
+
+    function makeDotTexture() {
+      var c = document.createElement('canvas'); c.width = c.height = 64;
+      var g = c.getContext('2d');
+      var grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grd.addColorStop(0, 'rgba(255,255,255,1)');
+      grd.addColorStop(0.5, 'rgba(255,255,255,0.96)');
+      grd.addColorStop(0.8, 'rgba(255,255,255,0.28)');
+      grd.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = grd; g.beginPath(); g.arc(32, 32, 32, 0, Math.PI * 2); g.fill();
+      var t = new THREE.CanvasTexture(c); t.needsUpdate = true; return t;
+    }
+    function setupGL() {
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+      renderer.setPixelRatio(1);
+      renderer.setClearColor(0x000000, 0);
+      scene = new THREE.Scene();
+      camera = new THREE.OrthographicCamera(0, 1, 0, 1, 0.1, 1000);
+      camera.position.z = 100;
+    }
+
     window.addEventListener('scroll', function () { scrollY = window.pageYOffset; }, { passive: true });
 
+    // logo/gem size as a fraction of the viewport — phone ~30%, laptop ~90% (gem peak)
+    function logoFrac() {
+      var vw = window.innerWidth;
+      if (vw >= 1024) return 0.13;     // karalabs-size: elegant, centred diamond
+      if (vw <= 600) return 0.17;      // a touch larger so it reads on phones
+      return 0.17 + (0.13 - 0.17) * (vw - 600) / 424;
+    }
     function measureBox() {
       var el = qs('#hero-headline'); if (!el) return;
       var r = el.getBoundingClientRect(); if (r.width < 10) return;
@@ -77,8 +115,12 @@
       return pts;
     }
     function build() {
-      W = canvas.width = window.innerWidth * dpr;
-      H = canvas.height = window.innerHeight * dpr;
+      W = window.innerWidth * dpr; H = window.innerHeight * dpr;
+      if (useGL) {
+        renderer.setSize(W, H, false);
+        camera.left = 0; camera.right = W; camera.top = 0; camera.bottom = H; camera.updateProjectionMatrix();
+      } else { canvas.width = W; canvas.height = H; }
+      textCanvas.width = W; textCanvas.height = H;
       measureBox();
       var text = sampleText();
       var CAP = (window.innerWidth < 700) ? 1000 : 1700;
@@ -86,7 +128,7 @@
       textPts = text;
       N = text.length > 30 ? text.length : 360;
       spin3D = []; mark2D = [];
-      var mcx = W / 2, mcy = H * 0.46, mscale = Math.min(W, H) * 0.15;
+      var mcx = W / 2, mcy = H * 0.46, mscale = Math.min(W, H) * logoFrac();
       for (var i = 0; i < N; i++) {
         spin3D.push(onFace(OFACES[(Math.random() * 8) | 0]));
         var seg = MARK[i % MARK.length], mt = Math.random();
@@ -101,29 +143,52 @@
           ph: Math.random() * Math.PI * 2, g: Math.random()
         });
       }
+      if (useGL) {
+        posArr = new Float32Array(N * 3); colArr = new Float32Array(N * 3);
+        if (points) { scene.remove(points); points.geometry.dispose(); }
+        geo = new THREE.BufferGeometry();
+        posAttr = new THREE.BufferAttribute(posArr, 3); colAttr = new THREE.BufferAttribute(colArr, 3);
+        posAttr.setUsage(THREE.DynamicDrawUsage); colAttr.setUsage(THREE.DynamicDrawUsage);
+        geo.setAttribute('position', posAttr); geo.setAttribute('color', colAttr);
+        var mat = new THREE.PointsMaterial({
+          size: 2.5 * dpr, map: makeDotTexture(), vertexColors: true, transparent: true,
+          depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: false
+        });
+        points = new THREE.Points(geo, mat);
+        scene.add(points);
+      }
+    }
+
+    function drawSolid(solidT) {
+      tctx.clearRect(0, 0, W, H);
+      if (solidT > 0 && box) {
+        var fy = (box.y - scrollY) * dpr + (box.h * dpr) * 0.5;
+        tctx.font = '500 ' + solidFS + 'px Geist, Inter, system-ui, sans-serif';
+        tctx.textAlign = 'left'; tctx.textBaseline = 'middle';
+        tctx.fillStyle = 'rgba(248,249,251,' + easeInOut(solidT).toFixed(3) + ')';
+        tctx.fillText('Jewel Labs', box.x * dpr + 4, fy);
+      }
     }
 
     // reduced motion — paint the white word once, hide intro
     if (prefersReduced) {
       if (intro) intro.style.display = 'none';
-      requestAnimationFrame(function () {
-        W = canvas.width = window.innerWidth * dpr; H = canvas.height = window.innerHeight * dpr;
-        measureBox(); var text = sampleText();
-        ctx.fillStyle = 'rgba(248,249,251,0.95)';
-        text.forEach(function (p) { ctx.fillRect(box.x * dpr + p.lx, (box.y - window.pageYOffset) * dpr + p.ly, dpr, dpr); });
-      });
+      if (useGL) setupGL();
+      requestAnimationFrame(function () { build(); drawSolid(1); });
       return;
     }
 
+    if (useGL) setupGL();
     document.body.classList.add('intro-lock');
     requestAnimationFrame(function () { build(); });
     var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(build, 200); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { build(); });
 
     // timeline (ms)
-    var A = 2600;   // slow gather from all sides → diamond
-    var B = 4000;   // diamond rests / spins (label reveals)
-    var C = 5500;   // travel into the word
+    var A = 2200;          // slow gather from all sides → flat 2D logo forms
+    var SNAP = A + 400;    // hold the logo static & solid (~0.4s), then snap to 3D
+    var B = SNAP + 1400;   // 3D rests / spins (label reveals)
+    var C = B + 1500;      // travel into the word
     var t0 = performance.now();
     var unlocked = false;
 
@@ -138,27 +203,27 @@
     (function frame(now) {
       var el = now - t0;
       if (el > B - 400) measureBox();
-      ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter';
+      if (ctx) { ctx.clearRect(0, 0, W, H); ctx.globalCompositeOperation = 'lighter'; }
 
       var assembleE = easeOutCubic(clamp(el / A, 0, 1));
-      var spinScale = Math.min(W, H) * 0.16;
-      var rotY = el < A ? 0 : (el - A) * 0.0016; // flat 2D logo until A, then snap to 3D + spin
+      var spinScale = Math.min(W, H) * logoFrac();
+      var rotY = el < SNAP ? 0 : (el - SNAP) * 0.0013; // flat 2D logo holds static, then snaps to 3D + spins
       var rotX = 0.52 + Math.sin(el * 0.0006) * 0.08;
       var travelT = clamp((el - B) / (C - B), 0, 1), tE = easeInOut(travelT);
-      var cp = clamp((el - (C + 300)) / 1500, 0, 1);      // light-yellow → white
-      var solidT = clamp((el - (C + 2300)) / 1200, 0, 1);  // ~2s after color: tighten to solid
+      var cp = clamp((el - (C + 300)) / 1200, 0, 1);      // light-yellow → white
+      var solidT = clamp((el - (C + 1500)) / 700, 0, 1);   // crisp-in fast (no faint ghost phase)
       var navClip = 60 * dpr;
 
       // golden bottom label — reveals from centre, expands like a movie title
       if (label) {
         var lp = clamp((el - 1500) / 1500, 0, 1);
         var lo = lp; if (el > B - 200) lo *= clamp(1 - (el - (B - 200)) / 700, 0, 1);
-        var sc = lerp(0.72, 1, easeOutCubic(lp));
-        var ls = lerp(0.08, 0.2, lp);
+        var wipe = easeOutCubic(lp);              // smooth reveal, left → right
         label.style.opacity = lo.toFixed(3);
-        label.style.transform = 'translateX(-50%) scale(' + sc.toFixed(3) + ')';
-        label.style.letterSpacing = ls.toFixed(3) + 'em';
+        label.style.transform = 'translateX(-50%)';
+        label.style.letterSpacing = '0.12em';
+        var clip = 'inset(0 ' + ((1 - wipe) * 100).toFixed(2) + '% 0 0)';
+        label.style.clipPath = clip; label.style.webkitClipPath = clip;
       }
       // pitch-black screen fades as particles travel into the word
       if (intro) {
@@ -173,7 +238,7 @@
         for (var i = 0; i < N; i++) {
           var p = parts[i];
           var gx, gy;
-          if (el < A) { gx = mark2D[i].x; gy = mark2D[i].y; } // particles form the flat 2D logo first
+          if (el < SNAP) { gx = mark2D[i].x; gy = mark2D[i].y; } // form the flat 2D logo, then hold it static & solid
           else {
           var sp = project(spin3D[i], rotY, rotX, spinScale); // then snap to 3D + spin
           if (travelT <= 0) { gx = sp.x; gy = sp.y; }
@@ -189,26 +254,32 @@
           }
           var follow = el < A ? (0.02 + 0.05 * assembleE) : (travelT > 0 && travelT < 1 ? 0.14 : lerp(0.3, 0.5, solidT));
           p.x = lerp(p.x, gx, follow); p.y = lerp(p.y, gy, follow);
-          if (travelT >= 1 && p.y < navClip) continue;
+          var ix = i * 3;
+          var clipped = (travelT >= 1 && p.y < navClip);
           var shimmer = 0.6 + 0.4 * Math.sin(el * 0.0026 + p.ph);
-          var alpha = (0.66 * (0.7 + 0.3 * shimmer)) * Math.max(assembleE, el < A ? 0 : 0.6) * (1 - solidT);
-          var lyR = 242 - 18 * p.g, lyG = 233 - 22 * p.g, lyB = 190 - 38 * p.g;
-          var r = lerp(lyR, 248, cp) | 0, g = lerp(lyG, 249, cp) | 0, b = lerp(lyB, 251, cp) | 0;
-          var sz = (1.0 + 0.35 * shimmer) * dpr;
-          ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha.toFixed(3) + ')';
-          ctx.fillRect(p.x - sz, p.y - sz, sz * 2, sz * 2);
+          var alpha = clipped ? 0 : (0.66 * (0.7 + 0.3 * shimmer)) * Math.max(assembleE, el < A ? 0 : 0.6) * (1 - solidT);
+          var lyR = 228 - 14 * p.g, lyG = 225 - 16 * p.g, lyB = 200 - 26 * p.g; // icy muted yellow (not bright cheap gold)
+          var r = lerp(lyR, 248, cp), g = lerp(lyG, 249, cp), b = lerp(lyB, 251, cp);
+          if (useGL) {
+            posArr[ix] = p.x; posArr[ix + 1] = p.y; posArr[ix + 2] = 0;
+            colArr[ix] = (r / 255) * alpha; colArr[ix + 1] = (g / 255) * alpha; colArr[ix + 2] = (b / 255) * alpha;
+          } else if (!clipped) {
+            var sz = (1.0 + 0.35 * shimmer) * dpr;
+            ctx.fillStyle = 'rgba(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ',' + alpha.toFixed(3) + ')';
+            ctx.fillRect(p.x - sz, p.y - sz, sz * 2, sz * 2);
+          }
         }
+      } else if (useGL && colArr) {
+        for (var z = 0; z < colArr.length; z++) colArr[z] = 0; // particles gone; solid text remains
       }
-      ctx.globalCompositeOperation = 'source-over';
 
-      // convert in-place to crisp solid text — same canvas, same spot, same moment
-      if (solidT > 0 && box) {
-        var fy = (box.y - scrollY) * dpr + (box.h * dpr) * 0.5;
-        ctx.font = '500 ' + solidFS + 'px Geist, Inter, system-ui, sans-serif';
-        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(248,249,251,' + easeInOut(solidT).toFixed(3) + ')';
-        ctx.fillText('Jewel Labs', box.x * dpr + 4, fy);
-      }
+      if (useGL && posAttr) {
+        posAttr.needsUpdate = true; colAttr.needsUpdate = true;
+        renderer.render(scene, camera);
+      } else if (ctx) { ctx.globalCompositeOperation = 'source-over'; }
+
+      // crisp solid word on the 2D overlay (in-place, same spot, same moment)
+      drawSolid(solidT);
 
       if (intro && unlocked && el > C + 600) { if (intro.parentNode) { intro.parentNode.removeChild(intro); intro = null; } }
       requestAnimationFrame(frame);
