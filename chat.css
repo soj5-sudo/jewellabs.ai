@@ -1,0 +1,179 @@
+/* ═══════════════════════════════════════════════════════════
+   Jewel Labs assistant — bottom-left dock
+   Flat, hairline, monochrome. Matches the site's glass tokens.
+   ═══════════════════════════════════════════════════════════ */
+
+.jl-chat {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 60;
+  font-family: var(--font, 'Inter', system-ui, sans-serif);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s var(--ease, ease), transform 0.6s var(--ease, ease);
+  pointer-events: none;
+}
+.jl-chat.is-ready { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+/* ── launcher pill ── */
+.jl-chat__launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 46px;
+  padding: 0 18px 0 15px;
+  border-radius: 9999px;
+  color: var(--text, #e9ecf2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition: transform 0.35s var(--ease-smooth, ease), border-color 0.35s ease, background 0.35s ease;
+}
+.jl-chat__launch:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); }
+.jl-chat__launch svg { width: 14px; height: 14px; color: var(--text-2, #99a2b2); flex: 0 0 auto; transition: color 0.35s ease; }
+.jl-chat__launch:hover svg { color: var(--text, #e9ecf2); }
+.jl-chat.is-open .jl-chat__launch { opacity: 0; transform: translateY(6px) scale(0.96); pointer-events: none; }
+
+/* ── panel ── */
+.jl-chat__panel {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: min(374px, calc(100vw - 44px));
+  height: min(560px, calc(100vh - 120px));
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(10, 10, 12, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  backdrop-filter: blur(26px) saturate(150%);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transform-origin: right bottom;
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  transition: opacity 0.32s var(--ease, ease), transform 0.32s var(--ease, ease);
+  pointer-events: none;
+}
+.jl-chat.is-open .jl-chat__panel { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+
+/* header */
+.jl-chat__head {
+  display: flex; align-items: center; gap: 11px;
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.07));
+  flex: 0 0 auto;
+}
+.jl-chat__mark {
+  width: 30px; height: 30px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--line-2, rgba(255, 255, 255, 0.13));
+  background: var(--accent-soft, rgba(196, 198, 202, 0.12));
+}
+.jl-chat__mark svg { width: 15px; height: 15px; color: var(--text, #e9ecf2); }
+.jl-chat__id { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.jl-chat__name { font-size: 13.5px; font-weight: 600; letter-spacing: 0.02em; color: var(--text, #e9ecf2); }
+.jl-chat__status { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3, #5d6473); }
+.jl-chat__close {
+  margin-left: auto; width: 30px; height: 30px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; border: 1px solid transparent; background: transparent;
+  color: var(--text-2, #99a2b2); transition: color 0.25s, border-color 0.25s, background 0.25s;
+}
+.jl-chat__close:hover { color: var(--text, #e9ecf2); border-color: var(--line, rgba(255, 255, 255, 0.07)); background: rgba(255, 255, 255, 0.04); }
+.jl-chat__close svg { width: 14px; height: 14px; }
+
+/* message log */
+.jl-chat__log {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 16px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+.jl-chat__log::-webkit-scrollbar { width: 6px; }
+.jl-chat__log::-webkit-scrollbar-thumb { background: var(--line-2, rgba(255, 255, 255, 0.13)); border-radius: 3px; }
+
+.jl-msg { max-width: 86%; font-size: 13.5px; line-height: 1.55; white-space: pre-wrap; word-wrap: break-word; }
+.jl-msg--bot {
+  align-self: flex-start;
+  color: var(--text, #e9ecf2);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.07));
+  padding: 11px 14px; border-radius: 3px 14px 14px 14px;
+}
+.jl-msg--user {
+  align-self: flex-end;
+  color: #0b0b0d;
+  background: #e9ecf2;
+  padding: 10px 14px; border-radius: 14px 14px 3px 14px;
+  font-weight: 450;
+}
+.jl-msg a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+/* typing indicator */
+.jl-typing { align-self: flex-start; display: inline-flex; gap: 5px; padding: 13px 15px; border-radius: 3px 14px 14px 14px; background: rgba(255, 255, 255, 0.045); border: 1px solid var(--line, rgba(255, 255, 255, 0.07)); }
+.jl-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3, #5d6473); animation: jl-bounce 1.3s var(--ease-smooth, ease) infinite; }
+.jl-typing span:nth-child(2) { animation-delay: 0.18s; }
+.jl-typing span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes jl-bounce { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 0.9; transform: translateY(-3px); } }
+
+/* suggestion chips */
+.jl-chat__suggest { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 16px 12px; flex: 0 0 auto; }
+.jl-chip {
+  font-size: 12px; letter-spacing: -0.005em; color: var(--text-2, #99a2b2);
+  padding: 7px 12px; border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.035); border: 1px solid var(--line, rgba(255, 255, 255, 0.07));
+  transition: color 0.25s, border-color 0.25s, background 0.25s;
+}
+.jl-chip:hover { color: var(--text, #e9ecf2); border-color: var(--line-2, rgba(255, 255, 255, 0.13)); background: rgba(255, 255, 255, 0.06); }
+
+/* composer */
+.jl-chat__form {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 12px 12px 10px; flex: 0 0 auto;
+  border-top: 1px solid var(--line, rgba(255, 255, 255, 0.07));
+}
+.jl-chat__input {
+  flex: 1 1 auto; resize: none;
+  max-height: 96px; min-height: 22px;
+  padding: 9px 12px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line-2, rgba(255, 255, 255, 0.13));
+  color: var(--text, #e9ecf2); font-family: inherit; font-size: 13.5px; line-height: 1.45;
+  outline: none; transition: border-color 0.25s;
+}
+.jl-chat__input::placeholder { color: var(--text-3, #5d6473); }
+.jl-chat__input:focus { border-color: rgba(255, 255, 255, 0.28); }
+.jl-chat__send {
+  flex: 0 0 auto; width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 11px; border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1); color: var(--text, #e9ecf2);
+  transition: background 0.25s, transform 0.25s, opacity 0.25s;
+}
+.jl-chat__send:hover { background: rgba(255, 255, 255, 0.17); transform: translateY(-1px); }
+.jl-chat__send:disabled { opacity: 0.4; cursor: default; transform: none; }
+.jl-chat__send svg { width: 15px; height: 15px; }
+
+.jl-chat__foot { padding: 0 16px 12px; font-size: 10px; letter-spacing: 0.03em; color: var(--text-3, #5d6473); text-align: center; flex: 0 0 auto; }
+
+@media (max-width: 520px) {
+  .jl-chat { left: 14px; right: 14px; bottom: 14px; }
+  .jl-chat__panel { width: calc(100vw - 28px); height: min(72vh, 540px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jl-chat, .jl-chat__panel, .jl-chat__launch { transition: none; }
+  .jl-typing span { animation: none; }
+}

@@ -1,0 +1,23 @@
+# dependencies / build
+node_modules/
+.next/
+dist/
+out/
+build/
+.vercel/
+
+# secrets — never commit
+.env
+.env.*
+!.env.example
+
+# claude code local settings (can capture local command history)
+.claude/settings.local.json
+
+# os / editor
+.DS_Store
+*.log
+
+# sqlite scratch
+*.db-shm
+*.db-wal

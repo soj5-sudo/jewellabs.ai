@@ -46,10 +46,31 @@
     var canvas = qs('#stage-canvas');
     var intro = qs('#intro');
     var label = qs('.intro__label');
+    var heroWord = qs('#hero-word');
     if (!canvas) return;
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var W = 0, H = 0, scrollY = window.pageYOffset;
     var N = 0, parts = [], spin3D = [], mark2D = [], textPts = [], box = null, solidFS = 14;
+    var finished = false, rafId = 0;
+
+    // hand the headline to a real DOM element, then tear down every intro layer
+    // so nothing keeps repainting over the page on scroll (fixes the ghosting).
+    function revealWord() {
+      if (heroWord) heroWord.style.opacity = '1';   // size is handled by CSS (72cqh)
+    }
+    function teardown() {
+      if (finished) return;
+      finished = true;
+      cancelAnimationFrame(rafId);
+      revealWord();
+      if (ctx) ctx.clearRect(0, 0, W, H);
+      if (tctx) tctx.clearRect(0, 0, W, H);
+      if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      if (textCanvas && textCanvas.parentNode) textCanvas.parentNode.removeChild(textCanvas);
+      if (useGL && renderer && renderer.dispose) { try { renderer.dispose(); } catch (e) {} }
+      if (intro && intro.parentNode) { intro.parentNode.removeChild(intro); intro = null; }
+      document.body.classList.remove('intro-lock');
+    }
 
     // WebGL (karalabs-style GPU particles) with a 2D fallback
     var useGL = (typeof THREE !== 'undefined');
@@ -115,6 +136,7 @@
       return pts;
     }
     function build() {
+      if (finished) return;
       W = window.innerWidth * dpr; H = window.innerHeight * dpr;
       if (useGL) {
         renderer.setSize(W, H, false);
@@ -170,11 +192,15 @@
       }
     }
 
-    // reduced motion — paint the white word once, hide intro
+    // reduced motion — no particles, just the crisp DOM headline
     if (prefersReduced) {
-      if (intro) intro.style.display = 'none';
-      if (useGL) setupGL();
-      requestAnimationFrame(function () { build(); drawSolid(1); });
+      measureBox();
+      finished = true;
+      revealWord();
+      if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      if (textCanvas && textCanvas.parentNode) textCanvas.parentNode.removeChild(textCanvas);
+      if (intro && intro.parentNode) { intro.parentNode.removeChild(intro); intro = null; }
+      document.body.classList.remove('intro-lock');
       return;
     }
 
@@ -191,6 +217,13 @@
     var C = B + 1500;      // travel into the word
     var t0 = performance.now();
     var unlocked = false;
+    var skipAfter = t0 + 1000;
+
+    // never trap the visitor: click / keypress skips, and a hard timeout fails open
+    function trySkip() { if (!finished && performance.now() >= skipAfter) { measureBox(); teardown(); } }
+    window.addEventListener('pointerdown', trySkip, { passive: true });
+    window.addEventListener('keydown', function (e) { if (e.key !== 'Tab') trySkip(); });
+    setTimeout(function () { if (!finished) { measureBox(); teardown(); } }, 8000);
 
     function project(p, rotY, rotX, scale) {
       var cosX = Math.cos(rotX), sinX = Math.sin(rotX), cosY = Math.cos(rotY), sinY = Math.sin(rotY);
@@ -201,6 +234,7 @@
     }
 
     (function frame(now) {
+      if (finished) return;
       var el = now - t0;
       if (el > B - 400) measureBox();
       if (ctx) { ctx.clearRect(0, 0, W, H); ctx.globalCompositeOperation = 'lighter'; }
@@ -281,8 +315,11 @@
       // crisp solid word on the 2D overlay (in-place, same spot, same moment)
       drawSolid(solidT);
 
+      // handoff complete → swap to the DOM headline and remove every intro layer
+      if (solidT >= 1) { teardown(); return; }
+
       if (intro && unlocked && el > C + 600) { if (intro.parentNode) { intro.parentNode.removeChild(intro); intro = null; } }
-      requestAnimationFrame(frame);
+      rafId = requestAnimationFrame(frame);
     })(t0);
   })();
 
@@ -296,33 +333,60 @@
     var FRAMES = 240, images = [], seq = { frame: 0 };
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; render(); }
     window.addEventListener('resize', resize);
+    var painted = false;
     function render() {
-      var img = images[seq.frame]; if (!img || !img.complete) return;
+      var img = images[seq.frame]; if (!img || !img.complete || !img.naturalWidth) return false;
       var ca = canvas.width / canvas.height, ia = img.width / img.height, dw, dh, ox, oy;
       if (ca > ia) { dw = canvas.width; dh = canvas.width / ia; ox = 0; oy = (canvas.height - dh) / 2; }
       else { dh = canvas.height; dw = canvas.height * ia; ox = (canvas.width - dw) / 2; oy = 0; }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, ox, oy, dw, dh);
+      painted = true;
+      return true;
     }
-    var loaded = 0;
+    // progressive: begin as soon as the first frame is ready (don't wait for all 240)
+    var loaded = 0, started = false;
+    function boot() { if (!started) { started = true; start(); } }
     for (var i = 1; i <= FRAMES; i++) {
       var img = new Image();
+      img.decoding = 'async';
       var num = i.toString(); while (num.length < 3) num = '0' + num;
       img.src = 'ezgif-frame-' + num + '.jpg';
-      img.onload = function () { loaded++; if (loaded === 1) resize(); if (loaded === FRAMES) start(); };
+      img.onload = function () { loaded++; if (loaded === 1) { resize(); boot(); } };
       images.push(img);
     }
     resize();
+
+    function heroVisible(hero) {
+      if (!hero) return true;
+      var r = hero.getBoundingClientRect();
+      return r.bottom > 0 && r.top < window.innerHeight;
+    }
     function start() {
-      var target = 0, current = 0, dragFrames = 0, dragging = false;
+      var target = 0, current = 0, dragFrames = 0, dragging = false, running = false, tickId = 0;
       var hero = qs('#hero');
       function update() { var sf = clamp(window.pageYOffset / window.innerHeight, 0, 1); target = clamp(sf * (FRAMES - 1) + dragFrames, 0, FRAMES - 1); }
       window.addEventListener('scroll', update, { passive: true });
       if (hero) { hero.addEventListener('pointerdown', function (e) { if (e.target.closest('a, button')) return; dragging = true; hero.classList.add('is-grabbing'); }); }
       window.addEventListener('pointerup', function () { dragging = false; if (hero) hero.classList.remove('is-grabbing'); });
       window.addEventListener('pointermove', function (e) { if (!dragging) return; dragFrames = clamp(dragFrames + (e.movementX + e.movementY) * 0.22, 0, FRAMES - 1); update(); }, { passive: true });
-      (function tick() { current += (target - current) * 0.055; var idx = clamp(Math.round(current), 0, FRAMES - 1); if (seq.frame !== idx) { seq.frame = idx; render(); } requestAnimationFrame(tick); })();
+      function tick() {
+        if (!running) return;
+        current += (target - current) * 0.055;
+        var idx = clamp(Math.round(current), 0, FRAMES - 1);
+        // redraw on frame change, and keep retrying until the very first frame lands
+        if (seq.frame !== idx || !painted) { seq.frame = idx; render(); }
+        tickId = requestAnimationFrame(tick);
+      }
+      function play() { if (!running) { running = true; tick(); } }
+      function pause() { running = false; cancelAnimationFrame(tickId); }
       update();
+      play();
+      // idle the scrub loop when the hero scrolls away or the tab is hidden
+      if ('IntersectionObserver' in window && hero) {
+        new IntersectionObserver(function (es) { es.forEach(function (e) { e.isIntersecting ? play() : pause(); }); }, { threshold: 0 }).observe(hero);
+      }
+      document.addEventListener('visibilitychange', function () { if (document.hidden) pause(); else if (heroVisible(hero)) play(); });
     }
   })();
 
@@ -347,7 +411,7 @@
   // CURSOR GLOW
   // ═══════════════════════════════════════════════════════════
   (function () {
-    var glow = qs('#cursor-glow'); if (!glow || prefersReduced) return;
+    var glow = qs('#cursor-glow'); if (!glow || prefersReduced || !window.matchMedia('(hover: hover)').matches) return;
     var tx = window.innerWidth / 2, ty = window.innerHeight / 2, x = tx, y = ty;
     window.addEventListener('mousemove', function (e) { tx = e.clientX; ty = e.clientY; }, { passive: true });
     (function tick() { x += (tx - x) * 0.12; y += (ty - y) * 0.12; glow.style.left = x + 'px'; glow.style.top = y + 'px'; requestAnimationFrame(tick); })();
@@ -364,6 +428,7 @@
     size(); window.addEventListener('resize', size);
     for (var i = 0; i < COUNT; i++) motes.push({ x: Math.random() * w, y: Math.random() * h, r: (0.7 + Math.random() * 1.7) * dpr, vx: (Math.random() - 0.5) * 0.1, vy: -0.05 - Math.random() * 0.11, baseO: 0.1 + Math.random() * 0.26 });
     (function draw() {
+      if (document.hidden) { requestAnimationFrame(draw); return; }
       ctx.clearRect(0, 0, w, h);
       var mx = globalMouseX * dpr, my = globalMouseY * dpr;
       for (var i = 0; i < motes.length; i++) {

@@ -237,7 +237,7 @@ em { font-style: normal; }
   display: flex; align-items: center; justify-content: space-between; gap: 24px;
 }
 .nav__brand { display: flex; align-items: center; gap: 10px; color: var(--text); }
-.nav__logo { width: 17px; height: 17px; color: var(--text); }
+.nav__logo { width: 19px; height: 19px; color: var(--text); }
 .nav__brand-text { font-size: 15px; font-weight: 600; letter-spacing: 0.16em; }
 .nav__links { display: none; align-items: center; gap: 34px; }
 @media (min-width: 900px) { .nav__links { display: flex; } }
@@ -268,9 +268,28 @@ em { font-style: normal; }
   width: min(560px, 92%);
   height: clamp(88px, 11vw, 140px);
   margin: 8px 0;
+  container-type: size; /* lets .hero__word size itself to the headline height */
 }
 .hero__watermark {
   display: none; /* removed — not visible to the naked eye */
+}
+/* real DOM headline — the particles hand off to this once the intro settles.
+   Kept crisp, selectable and scroll-native (no perpetual canvas overlay). */
+.hero__word {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Geist', 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: #f8f9fb;
+  white-space: nowrap;
+  font-size: clamp(42px, 8vw, 101px); /* fallback for browsers without container units */
+  font-size: 72cqh;                   /* 72% of the headline height — matches the particle handoff, stays responsive */
+  opacity: 0; /* JS reveals at the handoff moment */
+  pointer-events: none;
 }
 /* solid white headline — fades in once the particles settle */
 .hero__title-solid {
