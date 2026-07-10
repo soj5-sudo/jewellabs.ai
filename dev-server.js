@@ -25,7 +25,7 @@ var path = require('path');
   } catch (_) { /* no .env — fallback mode */ }
 })();
 
-var lib = require('./api/lib');
+var lib = require('./api/_lib');
 
 var PORT = process.env.PORT || 5273;
 var TYPES = {

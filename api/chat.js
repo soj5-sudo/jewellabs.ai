@@ -3,7 +3,7 @@
 /* Vercel / Node serverless function — POST /api/chat
    Keeps GEMINI_API_KEY server-side. Body: { messages: [{role,text}, ...] } */
 
-var lib = require('./lib');
+var lib = require('./_lib');
 
 // Best-effort in-memory rate limit (per warm instance).
 var HITS = {};

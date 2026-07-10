@@ -350,6 +350,7 @@
     for (var i = 1; i <= FRAMES; i++) {
       var img = new Image();
       img.decoding = 'async';
+      img.fetchPriority = 'low';   // stream the necklace in the background; never block the intro or fonts
       var num = i.toString(); while (num.length < 3) num = '0' + num;
       img.src = 'ezgif-frame-' + num + '.jpg';
       img.onload = function () { loaded++; if (loaded === 1) { resize(); boot(); } };
@@ -367,7 +368,7 @@
       var hero = qs('#hero');
       function update() { var sf = clamp(window.pageYOffset / window.innerHeight, 0, 1); target = clamp(sf * (FRAMES - 1) + dragFrames, 0, FRAMES - 1); }
       window.addEventListener('scroll', update, { passive: true });
-      if (hero) { hero.addEventListener('pointerdown', function (e) { if (e.target.closest('a, button')) return; dragging = true; hero.classList.add('is-grabbing'); }); }
+      if (hero) { hero.addEventListener('pointerdown', function (e) { if (e.pointerType === 'touch' || e.target.closest('a, button')) return; dragging = true; hero.classList.add('is-grabbing'); }); }
       window.addEventListener('pointerup', function () { dragging = false; if (hero) hero.classList.remove('is-grabbing'); });
       window.addEventListener('pointermove', function (e) { if (!dragging) return; dragFrames = clamp(dragFrames + (e.movementX + e.movementY) * 0.22, 0, FRAMES - 1); update(); }, { passive: true });
       function tick() {
