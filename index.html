@@ -36,7 +36,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=26" />
+  <link rel="stylesheet" href="style.css?v=27" />
   <link rel="stylesheet" href="chat.css?v=2" />
 
   <!-- Structured data for search + AI answer engines (GEO) -->
@@ -259,7 +259,7 @@
 
     <!-- ─── BACKERS MARQUEE (koovai-style) ─── -->
     <section class="marquee-section" aria-label="Trade shows and clients">
-      <p class="marquee-eyebrow">Featured and working with clients at</p>
+      <p class="marquee-eyebrow">Featured and working with clients at shows</p>
 
       <!-- tiny high-quality flag symbols, referenced by the show list below -->
       <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -301,7 +301,14 @@
               <use href="#hk-petal" transform="rotate(216 15 10)"/>
               <use href="#hk-petal" transform="rotate(288 15 10)"/>
             </g>
-            <circle cx="15" cy="10" r="0.65" fill="#DE2910"/>
+            <g fill="#DE2910">
+              <path id="hk-mark" d="M15 5.5 15.35 6.5 14.65 6.5Z"/>
+              <use href="#hk-mark" transform="rotate(72 15 10)"/>
+              <use href="#hk-mark" transform="rotate(144 15 10)"/>
+              <use href="#hk-mark" transform="rotate(216 15 10)"/>
+              <use href="#hk-mark" transform="rotate(288 15 10)"/>
+            </g>
+            <circle cx="15" cy="10" r="0.55" fill="#DE2910"/>
           </symbol>
         </defs>
       </svg>
@@ -321,6 +328,14 @@
           <span class="wm wm--show" aria-hidden="true"><svg class="flag"><use href="#flag-it"/></svg>Vicenzaoro</span>
           <span class="wm wm--show" aria-hidden="true"><svg class="flag"><use href="#flag-hk"/></svg>Jewellery&nbsp;&amp;&nbsp;Gem&nbsp;WORLD</span>
         </div>
+      </div>
+
+      <div class="creds">
+        <span class="cred"><strong>Forbes 30 Under 30</strong></span>
+        <span class="cred-div" aria-hidden="true"></span>
+        <span class="cred">Worked with <strong>Fortune 500</strong> companies</span>
+        <span class="cred-div" aria-hidden="true"></span>
+        <span class="cred">Founders from <strong>Cornell · CMU · Berkeley · Stanford</strong></span>
       </div>
     </section>
 
@@ -431,7 +446,7 @@
         <div class="step">
           <span class="step__num">01</span>
           <h4 class="step__title">Discovery</h4>
-          <p class="step__desc">A working call. We map the surface of your business — the calls, the invoices, the designs, the bottlenecks.</p>
+          <p class="step__desc">A working call. We map the surface of your business: the calls, the invoices, the designs, the bottlenecks.</p>
         </div>
         <div class="step">
           <span class="step__num">02</span>
@@ -441,7 +456,7 @@
         <div class="step">
           <span class="step__num">03</span>
           <h4 class="step__title">Deployment</h4>
-          <p class="step__desc">Storefront, then agents, then compliance, then design. Weeks, not quarters — on your own private infrastructure.</p>
+          <p class="step__desc">Storefront, then agents, then compliance, then design. Weeks, not quarters, on your own private infrastructure.</p>
         </div>
         <div class="step">
           <span class="step__num">04</span>
