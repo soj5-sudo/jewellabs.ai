@@ -415,6 +415,15 @@ em { font-style: normal; }
   opacity: 0.85; transition: opacity 0.3s;
 }
 .wm--yc:hover i { opacity: 1; }
+/* trade-show items: tiny flag + show name */
+.wm--show {
+  font-family: var(--font); font-weight: 600; font-size: 20px; letter-spacing: 0.01em;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.flag {
+  width: 24px; height: 16px; flex: 0 0 auto; border-radius: 2px; display: block;
+  box-shadow: 0 0 0 0.5px rgba(255,255,255,0.18), 0 1px 3px rgba(0,0,0,0.5);
+}
 
 /* ═══════════════════════════════════════════════════════════
    CARDS / PILLARS
@@ -613,6 +622,7 @@ em { font-style: normal; }
   .studio__title { font-size: clamp(26px, 8vw, 40px); }
   .marquee__track { gap: 56px; }
   .wm-serif { font-size: 21px; } .wm-sans { font-size: 19px; } .wm--forbes { font-size: 23px; } .wm--a16z { font-size: 17px; }
+  .wm--show { font-size: 17px; gap: 8px; } .flag { width: 21px; height: 14px; }
 }
 
 /* ═══════════════════════════════════════════════════════════
