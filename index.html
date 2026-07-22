@@ -36,8 +36,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=28" />
-  <link rel="stylesheet" href="agent-demo.css?v=4" />
+  <link rel="stylesheet" href="style.css?v=30" />
+  <link rel="stylesheet" href="agent-demo.css?v=6" />
   <link rel="stylesheet" href="chat.css?v=2" />
 
   <!-- Structured data for search + AI answer engines (GEO) -->
@@ -249,7 +249,7 @@
             <h1 class="sr-only">Jewel Labs: Agentic AI for the Diamond, Jewelry and Rare-Metal Trade</h1>
           </div>
 
-          <p class="hero__subtitle hero__subtitle--glass" style="text-wrap:balance;">Agentic AI Infrastructure that runs the operations of rare metal, jewelry, and diamond trade houses. One private layer of agents for rough cut planning, G7 compliance, design renders, and client records.</p>
+          <p class="hero__subtitle hero__subtitle--glass" style="text-wrap:balance;">Agentic AI Infrastructure for the diamond, jewelry, and rare-metal trade. One private layer of agents that runs the desk.</p>
 
           <div class="hero__actions">
             <a href="https://studio.jewellabs.org" target="_blank" rel="noopener noreferrer" class="btn btn--primary">Try the Studio →</a>
@@ -424,8 +424,8 @@
     <section class="theater" id="theater" aria-label="Live quoting agent demo">
       <div class="section__head" data-anim="fade-up">
         <p class="eyebrow">Live demo · Quoting Agent</p>
-        <h2 class="section__title">AI agents that do<br/><em>the work for you.</em></h2>
-        <p class="section__sub">It reads the request, prices it with our model, pings you in Slack, and sends the quote. You never open the inbox.</p>
+        <h2 class="section__title theater-title">AI agents that do<br/><em>the work for you.</em></h2>
+        <p class="section__sub">Agents run it all in the background and report back to you.</p>
       </div>
 
       <div class="theater-stage" id="theaterStage" data-anim="fade-up" data-delay="120">
@@ -640,7 +640,7 @@
     }, 9000);
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="app.js?v=26"></script>
+  <script src="app.js?v=27"></script>
   <script src="chat.js?v=9"></script>
 
   <!-- ─── Agent Theater (live inbox demo) ─── -->
@@ -654,19 +654,26 @@
     };
   </script>
   <script src="js/demo-data.js?v=3"></script>
-  <script src="js/agent-demo.js?v=6"></script>
+  <script src="js/agent-demo.js?v=8"></script>
   <script>
     (function () {
       var t = document.getElementById('theater');
       if (!t || !('IntersectionObserver' in window)) return;
+      var played = false;
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
-          if (en.isIntersecting && window.JL && JL.agentDemo) {
-            try { JL.agentDemo.play('quote'); } catch (e) {}
-            io.disconnect();
+          if (en.intersectionRatio >= 0.35) {
+            // play once when it scrolls into view; never interrupt a running demo
+            if (!played && window.JL && JL.agentDemo) {
+              played = true;
+              try { JL.agentDemo.play('quote'); } catch (e) {}
+            }
+          } else if (en.intersectionRatio === 0) {
+            // only a full scroll-away arms a fresh replay on return
+            played = false;
           }
         });
-      }, { threshold: 0.35 });
+      }, { threshold: [0, 0.35] });
       io.observe(t);
     })();
   </script>

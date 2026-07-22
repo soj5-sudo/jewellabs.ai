@@ -636,10 +636,10 @@
   overflow: hidden;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(180deg, rgba(16, 21, 28, 0.85), rgba(7, 10, 14, 0.94));
-  -webkit-backdrop-filter: blur(28px) saturate(1.3);
-  backdrop-filter: blur(28px) saturate(1.3);
-  box-shadow: 0 30px 72px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(20, 25, 34, 0.60), rgba(9, 12, 17, 0.70));
+  -webkit-backdrop-filter: blur(34px) saturate(1.5);
+  backdrop-filter: blur(34px) saturate(1.5);
+  box-shadow: 0 30px 72px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .ac-head {
@@ -673,7 +673,7 @@
 
 .ac-id { flex: 1; min-width: 0; }
 .ac-name { font-size: 13.5px; font-weight: 600; color: var(--ink); line-height: 1.3; }
-.ac-state { font-size: 11px; color: var(--muted); line-height: 1.3; }
+.ac-state { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; font-weight: 450; }
 
 .ac-badge {
   font-family: var(--font-mono);
@@ -1172,3 +1172,9 @@
 .slack-send { margin-left: auto; width: 30px; height: 30px; border-radius: 7px; display: grid; place-items: center; color: #b7b7b7; background: transparent; border: none; flex-shrink: 0; transition: color .3s var(--ease-out), background .3s var(--ease-out); }
 .slack-send svg { width: 16px; height: 16px; }
 .slack-compose.typing .slack-send { color: #007a5a; background: #e8f5ee; }
+
+/* ── smaller theater head: the live demo is the hero, not the copy ── */
+.theater .section__head { margin-bottom: 40px; }
+.theater .section__title { font-size: clamp(23px, 3.1vw, 33px); }
+.theater .section__sub { font-size: 15px; margin-top: 14px; max-width: 520px; }
+.theater .eyebrow { margin-bottom: 13px; }

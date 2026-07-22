@@ -32,12 +32,14 @@
   let unread = 0;
 
   /* ── timeline scheduler: absolute offsets + a run token so a
-     cancelled timeline can never touch the stage again ── */
+     cancelled timeline can never touch the stage again.
+     PACE slows the whole demo uniformly so a viewer can follow it. ── */
+  const PACE = 1.55;
   const seq = {
     timers: [], token: 0,
     at(ms, fn) {
       const tok = this.token;
-      this.timers.push(setTimeout(() => { if (tok === this.token) { try { fn(); } catch (e) {} } }, ms));
+      this.timers.push(setTimeout(() => { if (tok === this.token) { try { fn(); } catch (e) {} } }, ms * PACE));
     },
     cancel() { this.token++; this.timers.forEach(clearTimeout); this.timers = []; },
   };
@@ -426,8 +428,8 @@
     let tc = t + 750;
     for (let c = 0; c < smsg.length; c++) { const ch = smsg.charAt(c); seq.at(tc, () => slackTypeChar(ch)); tc += 40; }
     seq.at(tc + 260, () => addTyping());
-    seq.at(tc + 700, () => { removeTyping(); slackSendMsg(e, smsg); addLine('Sent to the owner in Slack', 'ok', true); });
-    t = tc + 700 + 450;
+    seq.at(tc + 700, () => { removeTyping(); slackSendMsg(e, smsg); setState('Message sent to you'); addLine('Sent to the owner in Slack', 'ok', true); });
+    t = tc + 700 + 1500; // hold on the delivered Slack message for ~2s before moving on
 
     // Back to Gmail: send the reply
     seq.at(t, () => { switchApp('gmail'); finishProcess(e, idx, sc); openEmail(e.id); setState('Reply sent'); addLine('Reply sent to ' + e.from.name + ', indicative ' + price, 'done', true); });

@@ -415,7 +415,7 @@
     var glow = qs('#cursor-glow'); if (!glow || prefersReduced || !window.matchMedia('(hover: hover)').matches) return;
     var tx = window.innerWidth / 2, ty = window.innerHeight / 2, x = tx, y = ty;
     window.addEventListener('mousemove', function (e) { tx = e.clientX; ty = e.clientY; }, { passive: true });
-    (function tick() { x += (tx - x) * 0.12; y += (ty - y) * 0.12; glow.style.left = x + 'px'; glow.style.top = y + 'px'; requestAnimationFrame(tick); })();
+    (function tick() { x += (tx - x) * 0.12; y += (ty - y) * 0.12; glow.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0) translate(-50%,-50%)'; requestAnimationFrame(tick); })();
   })();
 
   // ═══════════════════════════════════════════════════════════

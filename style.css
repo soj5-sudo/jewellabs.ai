@@ -13,9 +13,9 @@
   --line-2: rgba(255, 255, 255, 0.13);
   --accent: #c4c6ca;                 /* neutral grey — no blue tint */
   --accent-soft: rgba(196, 198, 202, 0.12);
-  --glass: rgba(255, 255, 255, 0.035);
-  --glass-2: rgba(255, 255, 255, 0.06);
-  --glass-line: rgba(255, 255, 255, 0.10);
+  --glass: rgba(255, 255, 255, 0.07);
+  --glass-2: rgba(255, 255, 255, 0.11);
+  --glass-line: rgba(255, 255, 255, 0.15);
   --radius: 16px;
   --maxw: 1200px;
   --font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -79,7 +79,8 @@ em { font-style: normal; }
   background: radial-gradient(circle, rgba(255,255,255,0.045) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none; z-index: 1;
-  transform: translate(-50%, -50%);
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform;
   transition: opacity 0.4s ease; opacity: 0;
 }
 @media (hover: hover) { body:hover #cursor-glow { opacity: 1; } }
@@ -154,8 +155,9 @@ em { font-style: normal; }
   margin-inline: auto;
 }
 
-[data-anim] { opacity: 0; transform: translateY(14px); filter: blur(6px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease), filter 0.6s var(--ease); }
-[data-anim].is-visible { opacity: 1; transform: translateY(0); filter: blur(0); }
+/* compositor-only reveal (opacity + transform) — no filter repaint, zero jitter */
+[data-anim] { opacity: 0; transform: translateY(16px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+[data-anim].is-visible { opacity: 1; transform: translateY(0); }
 
 /* ═══════════════════════════════════════════════════════════
    LIQUID GLASS BUTTONS (Apple-style)
@@ -177,9 +179,9 @@ em { font-style: normal; }
   color: var(--text);
   background: var(--glass);
   border: 1px solid var(--glass-line);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.14);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.18);
   transition: transform 0.2s var(--ease-smooth), background 0.2s var(--ease-smooth),
               border-color 0.2s var(--ease-smooth), box-shadow 0.2s var(--ease-smooth);
   overflow: hidden;
@@ -196,8 +198,8 @@ em { font-style: normal; }
 .btn--full { width: 100%; }
 
 .btn--primary {
-  background: rgba(255,255,255,0.10);
-  border-color: rgba(255,255,255,0.20);
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.28);
 }
 .btn--primary:hover {
   background: rgba(255,255,255,0.16);
@@ -387,7 +389,7 @@ em { font-style: normal; }
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 13%, #000 87%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 13%, #000 87%, transparent);
 }
-.marquee__track { display: flex; width: max-content; gap: 84px; align-items: center; animation: marquee 48s linear infinite; }
+.marquee__track { display: flex; width: max-content; gap: 84px; align-items: center; animation: marquee 48s linear infinite; will-change: transform; transform: translateZ(0); backface-visibility: hidden; }
 .marquee:hover .marquee__track { animation-play-state: paused; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
