@@ -37,7 +37,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=30" />
-  <link rel="stylesheet" href="agent-demo.css?v=6" />
+  <link rel="stylesheet" href="agent-demo.css?v=7" />
   <link rel="stylesheet" href="chat.css?v=2" />
 
   <!-- Structured data for search + AI answer engines (GEO) -->
@@ -529,15 +529,16 @@
           <div class="theater-finale hidden" id="theaterFinale"></div>
         </div>
 
-        <aside class="agent-console" id="agentConsole" aria-label="Agent activity">
+        <aside class="agent-console" id="agentConsole" aria-label="Agent team activity">
           <div class="ac-head">
             <span class="ac-dot" id="acDot"></span>
             <div class="ac-id">
-              <div class="ac-name" id="acName">Quoting Agent</div>
+              <div class="ac-name" id="acName">Agent Team</div>
               <div class="ac-state" id="acState">Standing by</div>
             </div>
-            <span class="ac-badge">LIVE</span>
+            <span class="ac-badge">A2A &middot; LIVE</span>
           </div>
+          <div class="ac-roster" id="acRoster" aria-hidden="true"></div>
           <div class="ac-log" id="acLog" aria-live="off"></div>
           <div class="ac-foot" id="acFoot">Standing by</div>
         </aside>
@@ -654,7 +655,7 @@
     };
   </script>
   <script src="js/demo-data.js?v=3"></script>
-  <script src="js/agent-demo.js?v=8"></script>
+  <script src="js/agent-demo.js?v=9"></script>
   <script>
     (function () {
       var t = document.getElementById('theater');

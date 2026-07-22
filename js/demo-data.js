@@ -22,6 +22,9 @@ window.JL_DEMO = {
     inbox: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2.5 3h13v12h-13z M2.5 10.5h4.2c.4 1.3 1.2 2 2.3 2s1.9-.7 2.3-2h4.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
     diamond: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 8 16 12 12 16 8 12Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 2.5V8M12 16v5.5M2.5 12H8M16 12h5.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
     price: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2.2v13.6M12.2 5.1c-.6-1-1.8-1.6-3.2-1.6-2 0-3.3 1-3.3 2.5S6.9 8.8 9 9.2s3.3 1 3.3 2.6S11 14.5 9 14.5c-1.5 0-2.7-.6-3.3-1.7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    filter: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2.5 4h13l-5 6v4.5l-3 1.5V10z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+    send: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 9l13.5-6-3.4 12-3.4-4.3L2 9zm6.7 1.7l5.4-6.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+    arrow: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3.5 9h11M10 4.5 14.5 9 10 13.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   },
 
   scenarios: {
@@ -29,29 +32,44 @@ window.JL_DEMO = {
     /* ── THE QUOTING AGENT ── */
     quote: {
       key: 'quote',
+      teamName: 'Agent Team',
       agentName: 'Quoting Agent',
-      agentSub: 'Render, price, reply — while they wait',
+      agentSub: 'Four agents, one desk, coordinating over A2A',
       account: 'quotes@jewellabs.org',
-      feature: 'q1', // auto-opened during the run to reveal the full quote
-      cta: { href: 'https://studio.jewellabs.org', label: 'Try the quoting agent yourself' },
-      openLine: 'Inbox scan started. 5 quote requests overnight.',
+      feature: 'q1', // worked end to end during the run to reveal the full quote
+      cta: { href: 'https://studio.jewellabs.org', label: 'Try the agents yourself' },
+      openLine: 'Overnight inbox: 7 threads. Triage is classifying intent.',
       closeLines: [
-        'Closing the queue',
-        '5 renders composed, 5 quotes sent. Every reply priced, not guessed.',
+        'Wrapping the run',
+        '5 quotes sent, 2 threads filtered. Four agents, zero touch.',
       ],
       finaleState: '5 quotes sent',
       finale: {
         title: 'Overnight queue cleared',
         stat: '5 of 5',
-        statLabel: 'Requests rendered, priced and answered',
+        statLabel: 'Quote requests answered, unattended',
         rows: [
-          ['Rendered and priced', 'Rapaport list and live metal'],
-          ['Owner notified', 'in Slack, every quote'],
-          ['Average reply', '38 seconds, unattended'],
+          ['Agents coordinated', 'Triage, Quoting, Pricing, Comms'],
+          ['A2A messages', '11 exchanged over the run'],
+          ['Owner notified', 'Slack, every quote'],
         ],
-        note: 'Staged demo. Figures indicative. The studio quotes at live spot on your own request.',
+        note: 'Staged demo. Figures indicative. The studio runs the same agents on your own inbox.',
       },
       emails: [
+        {
+          id: 'n1', noise: true,
+          from: { name: 'GIA Laboratory', email: 'reports@gia.edu', initial: 'G', hue: 145 },
+          subject: 'Your grading reports are ready',
+          snippet: 'Three reports completed for submission 2288-4471. Download enclosed.',
+          time: '6:48 AM',
+        },
+        {
+          id: 'n2', noise: true,
+          from: { name: 'JCK Events', email: 'news@jckonline.com', initial: 'J', hue: 25 },
+          subject: 'JCK Las Vegas 2026, early registration',
+          snippet: 'Save the date and register early for next year at the Venetian.',
+          time: '6:55 AM',
+        },
         {
           id: 'q1',
           from: { name: 'Claire Bennett', email: 'claire.b.4821@gmail.com', initial: 'C', hue: 340 },

@@ -22,6 +22,14 @@
   const I = D.icons;
   const LABELS = { quote: 'Quotes' };
   const DEFAULT = 'quote';
+  // the agent team that coordinates over the A2A protocol
+  const AGENTS = [
+    { id: 'triage', name: 'Triage', ico: 'filter' },
+    { id: 'quoting', name: 'Quoting', ico: 'diamond' },
+    { id: 'pricing', name: 'Pricing', ico: 'price' },
+    { id: 'comms', name: 'Comms', ico: 'send' },
+  ];
+  const AGENT = {}; AGENTS.forEach((a) => { AGENT[a.id] = a; });
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let els = null;
@@ -231,6 +239,53 @@
   function setFoot(s) { els.foot.textContent = s; }
   function setCount() { els.count.textContent = unread > 0 ? String(unread) : ''; }
 
+  /* ═══════ multi-agent orchestration (A2A) ═══════ */
+  function renderRoster() {
+    if (!els.roster) return;
+    els.roster.innerHTML = AGENTS.map((a) =>
+      '<div class="ac-agent" data-agent="' + a.id + '" data-status="idle">' +
+        '<span class="ac-agent-ico">' + (I[a.ico] || I.diamond) + '</span>' +
+        '<span class="ac-agent-name">' + a.name + '</span>' +
+        '<span class="ac-agent-dot"></span>' +
+      '</div>').join('');
+  }
+  function agentChip(id) { return els.roster ? els.roster.querySelector('.ac-agent[data-agent="' + id + '"]') : null; }
+  function setAgent(id, status) { const c = agentChip(id); if (c) c.setAttribute('data-status', status); }
+  function activate(id) {
+    AGENTS.forEach((a) => {
+      const c = agentChip(a.id);
+      if (c && c.getAttribute('data-status') !== 'done') c.setAttribute('data-status', a.id === id ? 'active' : 'idle');
+    });
+  }
+  function agentsDone() { AGENTS.forEach((a) => setAgent(a.id, 'done')); }
+  // append a real-looking A2A protocol envelope (from -> to, intent, plain gloss)
+  function a2a(fromId, toId, intent, gloss) {
+    const f = AGENT[fromId] || { name: fromId }, to = AGENT[toId] || { name: toId };
+    const div = document.createElement('div');
+    div.className = 'a2a';
+    div.innerHTML =
+      '<div class="a2a-head">' +
+        '<span class="a2a-tag" data-agent="' + esc(fromId) + '">' + esc(f.name) + '</span>' +
+        '<span class="a2a-arrow">' + I.arrow + '</span>' +
+        '<span class="a2a-tag" data-agent="' + esc(toId) + '">' + esc(to.name) + '</span>' +
+        '<span class="a2a-intent">' + esc(intent) + '</span>' +
+      '</div>' +
+      '<div class="a2a-gloss">' + esc(gloss) + '</div>';
+    els.log.appendChild(div);
+    els.log.scrollTop = els.log.scrollHeight;
+    if (AGENT[toId]) activate(toId);
+  }
+  function filterNoise(e) {
+    const row = rowOf(e);
+    if (!row) return;
+    row.classList.remove('gm-scan', 'unread');
+    row.classList.add('gm-filtered');
+    const slot = row.querySelector('.gm-slot');
+    if (slot) slot.innerHTML = '<span class="gm-chip muted">Filtered</span>';
+    if (unread > 0) unread--; setCount();
+    done[e.id] = true;
+  }
+
   /* ═══════ stage control ═══════ */
   function resetStage(sc) {
     done = {}; unread = 0; finished = false;
@@ -239,7 +294,8 @@
     els.finale.classList.add('hidden'); els.finale.innerHTML = '';
     els.log.innerHTML = '';
     resetApps();
-    els.name.textContent = sc.agentName;
+    renderRoster();
+    els.name.textContent = sc.teamName || sc.agentName;
     setState('Standing by'); setFoot('Standing by');
     els.dot.classList.remove('live');
     setCount(); els.range.textContent = '';
@@ -399,41 +455,43 @@
     const price = quoteOf(e);
     const idx = sc.emails.indexOf(e);
 
-    // Gmail: read the request
-    seq.at(t, () => { switchApp('gmail'); startProcess(e); setState('Reading the request'); setFoot(e.from.name); });
-    seq.at(t + 350, () => { addLine(e.console[0], 'head'); addTyping(); });
-    seq.at(t + 1200, () => { removeTyping(); addLine(e.console[1]); openEmail(e.id); });
-    t += 2200;
+    const who = e.from.name;
 
-    // Price Model (our model, trained on Rapaport): search + predict fair value
-    seq.at(t, () => { closeRead(); switchApp('rapaport'); setState('Pricing with our model'); addLine('Opening the price model', 'sys'); });
+    // Quoting picks up the routed request and asks Pricing for a value
+    seq.at(t, () => { activate('quoting'); switchApp('gmail'); startProcess(e); setState('Quoting agent on ' + who); openEmail(e.id); });
+    seq.at(t + 750, () => a2a('quoting', 'pricing', 'price.request', 'Quoting asks Pricing for a fair value on ' + who + "'s piece."));
+    t += 2000;
+
+    // Pricing agent runs the model on the price-model tab
+    seq.at(t, () => { activate('pricing'); closeRead(); switchApp('rapaport'); setState('Pricing agent running the model'); });
     seq.at(t + 600, () => { rapType(rapQueryFor(e)); addTyping(); });
-    seq.at(t + 1500, () => { removeTyping(); rapListings(e); addLine('Pulled the Rapaport reference and comparables'); });
+    seq.at(t + 1500, () => { removeTyping(); rapListings(e); addLine('Reference and comparables pulled'); });
     seq.at(t + 2200, () => { rapPredict(); addLine('Predicting the fair value', 'sys'); addTyping(); });
-    seq.at(t + 3500, () => { removeTyping(); rapResolve(e); addLine('Fair value locked at ' + price, 'ok', true); });
-    t += 4200;
+    seq.at(t + 3400, () => { removeTyping(); rapResolve(e); });
+    seq.at(t + 3700, () => a2a('pricing', 'quoting', 'price.result', 'Pricing returns ' + price + ' fair value, high confidence.'));
+    t += 4400;
 
-    // Back to Gmail: assemble and verify the quote
-    seq.at(t, () => { switchApp('gmail'); setState('Building the quote'); });
-    seq.at(t + 250, () => addLine('Added the stone at model price'));
-    seq.at(t + 900, () => addLine('Added the metal at spot'));
-    seq.at(t + 1500, () => addLine('Checked the margin, verified against budget', 'ok', true));
-    t += 2100;
+    // Quoting assembles and verifies the quote
+    seq.at(t, () => { activate('quoting'); switchApp('gmail'); setState('Quoting building the quote'); });
+    seq.at(t + 300, () => addLine('Rendered the piece, metal added at spot'));
+    seq.at(t + 1100, () => addLine('Margin checked, verified against budget', 'ok', true));
+    t += 1900;
 
-    // Slack: type the owner an update in real time, then send
+    // Quoting hands off to Comms, which messages the owner live in Slack
     const order = 'JL-' + (1042 + idx);
-    const smsg = 'Quote ready. ' + e.from.name + ', order #' + order + ', ' + price + ' indicative.';
-    seq.at(t, () => { switchApp('slack'); slackReset(); setState('Messaging the owner'); addLine('Switching to Slack', 'sys'); });
-    seq.at(t + 450, () => addLine('Typing the owner an update'));
-    let tc = t + 750;
+    const smsg = 'Quote ready. ' + who + ', order #' + order + ', ' + price + ' indicative.';
+    seq.at(t, () => a2a('quoting', 'comms', 'notify.owner', 'Quoting asks Comms to notify the owner in Slack.'));
+    seq.at(t + 750, () => { activate('comms'); switchApp('slack'); slackReset(); setState('Comms messaging the owner'); });
+    let tc = t + 1150;
     for (let c = 0; c < smsg.length; c++) { const ch = smsg.charAt(c); seq.at(tc, () => slackTypeChar(ch)); tc += 40; }
     seq.at(tc + 260, () => addTyping());
-    seq.at(tc + 700, () => { removeTyping(); slackSendMsg(e, smsg); setState('Message sent to you'); addLine('Sent to the owner in Slack', 'ok', true); });
-    t = tc + 700 + 1500; // hold on the delivered Slack message for ~2s before moving on
+    seq.at(tc + 700, () => { removeTyping(); slackSendMsg(e, smsg); setState('Owner notified'); addLine('Delivered to the owner in Slack', 'ok', true); });
+    seq.at(tc + 950, () => a2a('comms', 'quoting', 'notify.ack', 'Comms confirms the owner has the quote.'));
+    t = tc + 950 + 1500; // ~2s hold on the delivered message
 
-    // Back to Gmail: send the reply
-    seq.at(t, () => { switchApp('gmail'); finishProcess(e, idx, sc); openEmail(e.id); setState('Reply sent'); addLine('Reply sent to ' + e.from.name + ', indicative ' + price, 'done', true); });
-    seq.at(t + 2700, () => { closeRead(); setState('Working the inbox'); });
+    // Quoting sends the reply to the client
+    seq.at(t, () => { activate('quoting'); switchApp('gmail'); finishProcess(e, idx, sc); openEmail(e.id); setState('Reply sent to ' + who); addLine('Reply sent, indicative ' + price, 'done', true); });
+    seq.at(t + 2700, () => { closeRead(); setState('Working the queue'); });
     t += 3000;
 
     return t;
@@ -447,29 +505,42 @@
     if (reduce) { renderFinalState(active); return; }
     resetStage(sc);
 
-    const fe = sc.emails.find((e) => e.id === sc.feature) || sc.emails[0];
+    const fe = sc.emails.find((e) => e.id === sc.feature) || sc.emails.find((e) => !e.noise);
+    const quotes = sc.emails.filter((e) => !e.noise);
+    const noise = sc.emails.filter((e) => e.noise);
     let t = 500;
 
-    // inbox fills
-    sc.emails.forEach((e, i) => { seq.at(t, () => arrive(e, i, sc)); t += 320; });
+    // inbox fills with everything: quote requests and noise
+    sc.emails.forEach((e, i) => { seq.at(t, () => arrive(e, i, sc)); t += 300; });
     t += 250;
-    seq.at(t, () => { els.dot.classList.add('live'); setState('Watching the inbox'); addLine(sc.openLine, 'sys'); });
-    t += 650;
+    seq.at(t, () => { els.dot.classList.add('live'); activate('triage'); setState('Triage scanning the inbox'); addLine(sc.openLine, 'sys'); });
+    t += 750;
 
-    // the featured request, worked end to end across apps
+    // Triage: search, classify, filter the noise, route the quotes
+    seq.at(t, () => { switchApp('gmail'); setState('Triage classifying ' + sc.emails.length + ' threads'); addLine('Searching threads, classifying intent'); addTyping(); });
+    t += 1100;
+    noise.forEach((e) => {
+      seq.at(t, () => { removeTyping(); startProcess(e); });
+      seq.at(t + 320, () => filterNoise(e));
+      t += 620;
+    });
+    seq.at(t, () => { removeTyping(); a2a('triage', 'quoting', 'route.requests', quotes.length + ' quote requests routed to Quoting. ' + noise.length + ' non-quotes filtered out.'); });
+    t += 1300;
+
+    // the featured request, worked end to end across the agent team
     t = scheduleFeature(fe, sc, t);
 
-    // the rest of the queue, cleared quickly
-    sc.emails.filter((e) => e !== fe).forEach((e) => {
+    // the rest of the quote queue, cleared quickly
+    quotes.filter((e) => e !== fe).forEach((e) => {
       const idx = sc.emails.indexOf(e);
-      seq.at(t, () => { startProcess(e); addLine(e.console[0], 'head'); });
-      seq.at(t + 520, () => { addLine('Rendered, priced, replied', 'ok', true); finishProcess(e, idx, sc); });
+      seq.at(t, () => { activate('quoting'); startProcess(e); addLine(e.console[0], 'head'); });
+      seq.at(t + 560, () => { addLine('Priced and replied', 'ok', true); finishProcess(e, idx, sc); });
       t += 820;
     });
 
     // wrap up
     t += 300;
-    seq.at(t, () => { setState('Wrapping up'); addLine(sc.closeLines[0], 'sys'); addTyping(); });
+    seq.at(t, () => { setState('Wrapping up'); agentsDone(); addLine(sc.closeLines[0], 'sys'); addTyping(); });
     t += 1300;
     seq.at(t, () => { removeTyping(); addLine(sc.closeLines[1], 'done', true); switchApp('gmail'); showFinale(sc); });
   }
@@ -481,35 +552,32 @@
     const sc = D.scenarios[key];
     if (!sc) return;
     resetStage(sc);
-    const verdicts = computeVerdicts(sc);
+    const quotes = sc.emails.filter((e) => !e.noise);
     sc.emails.forEach((e) => {
-      done[e.id] = true;
       const row = rowOf(e);
       if (!row) return;
       row.classList.remove('is-hidden', 'unread');
-      const bad = isBlocked(e, verdicts);
-      if (bad) row.classList.add('gm-bad');
       const slot = row.querySelector('.gm-slot');
-      if (slot) slot.innerHTML = chipHTML(bad, bad ? 'Blocked' : (e.chip || 'Processed'));
+      if (e.noise) {
+        row.classList.add('gm-filtered');
+        if (slot) slot.innerHTML = '<span class="gm-chip muted">Filtered</span>';
+      } else {
+        done[e.id] = true;
+        if (slot) slot.innerHTML = chipHTML(false, e.chip || 'Replied');
+      }
     });
     const empty = els.list.querySelector('.gm-empty');
     if (empty) empty.remove();
     unread = 0; setCount();
-    els.range.textContent = sc.emails.length + ' of ' + sc.emails.length;
+    els.range.textContent = quotes.length + ' quoted';
+    agentsDone();
     addLine(sc.openLine, 'sys');
-    sc.emails.forEach((e) => {
-      const bad = isBlocked(e, verdicts);
-      (e.console || []).forEach((ln, j) => {
-        let cls = '';
-        if (j === 0) cls = 'head';
-        else if (bad) cls = 'bad';
-        else if (j === (e.console.length - 1)) cls = 'ok';
-        addLine(ln, cls, j === e.console.length - 1 && j > 0);
-      });
-    });
-    addLine(sc.closeLines[0], 'sys');
+    a2a('triage', 'quoting', 'route.requests', quotes.length + ' quote requests routed. ' + (sc.emails.length - quotes.length) + ' filtered.');
+    a2a('quoting', 'pricing', 'price.request', 'Fair value requested for each piece.');
+    a2a('pricing', 'quoting', 'price.result', 'Prices returned from the model.');
+    a2a('quoting', 'comms', 'notify.owner', 'Owner notified in Slack for every quote.');
     addLine(sc.closeLines[1], 'done', true);
-    showFinale(sc, verdicts);
+    showFinale(sc);
     els.log.scrollTop = els.log.scrollHeight;
   }
 
@@ -537,7 +605,7 @@
       state: $('acState'), foot: $('acFoot'), dot: $('acDot'),
       count: $('gmCount'), range: $('gmRange'), avatar: $('gmAvatar'),
       label: $('gmLabel'), cta: $('demoCTA'), skip: $('demoSkip'),
-      replay: $('demoReplay'),
+      replay: $('demoReplay'), roster: $('acRoster'),
     };
     for (const k in els) { if (!els[k]) return; } // fail open if the section is absent
 
