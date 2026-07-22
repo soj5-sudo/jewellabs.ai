@@ -34,6 +34,8 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'cv02', 'cv03', 'cv04';
   overflow-x: hidden;
   line-height: 1.5;
   letter-spacing: -0.011em;
@@ -152,8 +154,8 @@ em { font-style: normal; }
   margin-inline: auto;
 }
 
-[data-anim] { opacity: 0; transform: translateY(24px); transition: opacity 0.95s var(--ease), transform 0.95s var(--ease); }
-[data-anim].is-visible { opacity: 1; transform: translateY(0); }
+[data-anim] { opacity: 0; transform: translateY(14px); filter: blur(6px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease), filter 0.6s var(--ease); }
+[data-anim].is-visible { opacity: 1; transform: translateY(0); filter: blur(0); }
 
 /* ═══════════════════════════════════════════════════════════
    LIQUID GLASS BUTTONS (Apple-style)
@@ -178,8 +180,8 @@ em { font-style: normal; }
   backdrop-filter: blur(14px) saturate(160%);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.14);
-  transition: transform 0.4s var(--ease-smooth), background 0.4s var(--ease-smooth),
-              border-color 0.4s var(--ease-smooth), box-shadow 0.4s var(--ease-smooth);
+  transition: transform 0.2s var(--ease-smooth), background 0.2s var(--ease-smooth),
+              border-color 0.2s var(--ease-smooth), box-shadow 0.2s var(--ease-smooth);
   overflow: hidden;
 }
 .btn::before {
@@ -442,7 +444,7 @@ em { font-style: normal; }
   position: relative; padding: 32px 28px; border-radius: var(--radius);
   background: var(--glass); border: 1px solid var(--line);
   backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%);
-  transition: transform 0.45s var(--ease), border-color 0.45s var(--ease), background 0.45s var(--ease);
+  transition: transform 0.26s var(--ease), border-color 0.26s var(--ease), background 0.26s var(--ease);
   overflow: hidden;
 }
 .card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(160deg, rgba(255,255,255,0.05), transparent 40%); opacity: 0; transition: opacity 0.45s var(--ease); pointer-events: none; }
@@ -641,6 +643,26 @@ em { font-style: normal; }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
   .marquee__track { animation: none; flex-wrap: wrap; justify-content: center; }
-  [data-anim] { opacity: 1; transform: none; }
+  [data-anim] { opacity: 1; transform: none; filter: none; }
   #intro { display: none; }
 }
+
+/* ═══ premium dev-tool polish (Linear / Vercel / Resend register) ═══ */
+.btn:active { transform: translateY(0) scale(0.98); transition-duration: 0.08s; }
+:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px rgba(255,255,255,0.34); border-radius: 8px; }
+.btn:focus-visible { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px rgba(255,255,255,0.42), 0 8px 30px rgba(0,0,0,0.35); }
+
+/* hairline seams between content bands (one per boundary, no doubles) */
+.section + .section, .theater, .studio { border-top: 1px solid var(--line); }
+
+/* balanced headings + no orphan words */
+.section__title, .studio__title, .hero__word { text-wrap: balance; }
+.section__sub, .card__desc, .step__desc, .spotlight__lead { text-wrap: pretty; }
+
+/* fine film grain for material depth on pitch black (behind the particle layers) */
+.grain {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+@media (prefers-reduced-motion: reduce) { .grain { display: none; } }

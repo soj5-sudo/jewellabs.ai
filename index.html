@@ -35,8 +35,9 @@
   <meta name="twitter:image:alt" content="Jewel Labs: Agentic AI infrastructure for the diamond, jewelry, and rare-metal trade" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=27" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=28" />
+  <link rel="stylesheet" href="agent-demo.css?v=4" />
   <link rel="stylesheet" href="chat.css?v=2" />
 
   <!-- Structured data for search + AI answer engines (GEO) -->
@@ -196,6 +197,7 @@
 
   <!-- ─── AMBIENT LAYERS ─── -->
   <div class="grid-bg" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
   <canvas id="flares-canvas" aria-hidden="true"></canvas>
   <div id="cursor-glow" aria-hidden="true"></div>
 
@@ -331,7 +333,7 @@
       </div>
 
       <div class="creds">
-        <span class="cred"><strong>Forbes 30 Under 30</strong></span>
+        <span class="cred">Founder featured in <strong>Forbes 30 Under 30</strong></span>
         <span class="cred-div" aria-hidden="true"></span>
         <span class="cred">Worked with <strong>Fortune 500</strong> companies</span>
         <span class="cred-div" aria-hidden="true"></span>
@@ -415,6 +417,139 @@
           <div class="dds-bar"><span class="dds-bar__fill"></span></div>
           <div class="dds-foot">Generated in 1.8s · No manual entry</div>
         </div>
+      </div>
+    </section>
+
+    <!-- ─── AGENT THEATER (the quoting agent, live) ─── -->
+    <section class="theater" id="theater" aria-label="Live quoting agent demo">
+      <div class="section__head" data-anim="fade-up">
+        <p class="eyebrow">Live demo · Quoting Agent</p>
+        <h2 class="section__title">AI agents that do<br/><em>the work for you.</em></h2>
+        <p class="section__sub">It reads the request, prices it with our model, pings you in Slack, and sends the quote. You never open the inbox.</p>
+      </div>
+
+      <div class="theater-stage" id="theaterStage" data-anim="fade-up" data-delay="120">
+        <div class="browser-frame" id="demoBrowser">
+          <div class="bf-chrome">
+            <span class="bf-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <div class="bf-tabs" id="bfTabs" aria-hidden="true">
+              <span class="bf-tab active" data-app="gmail"><span class="bf-fav"><svg viewBox="0 0 24 18"><path fill="#4285f4" d="M1.636 18H5.82V8.727L0 4.364v12c0 .904.732 1.636 1.636 1.636z"/><path fill="#34a853" d="M18.18 18h4.184A1.636 1.636 0 0 0 24 16.364v-12l-5.82 4.363z"/><path fill="#fbbc04" d="M18.18 1.636v7.091L24 4.364V2.455c0-2.023-2.309-3.178-3.927-1.964z"/><path fill="#ea4335" d="M5.82 8.727v-7.09L12 6.272l6.18-4.636v7.09L12 13.365z"/><path fill="#c5221f" d="M0 2.455v1.909l5.82 4.363V1.636L4.017.491C2.398-.723 0 .432 0 2.455z"/></svg></span><span>Gmail</span></span>
+              <span class="bf-tab" data-app="rapaport"><span class="bf-fav" style="background:#12161c;color:#9fc0dd;font-size:10px">&#9670;</span><span>Price&nbsp;Model</span></span>
+              <span class="bf-tab" data-app="slack"><span class="bf-fav" style="background:#4a154b;color:#fff;font-size:10px;font-weight:700">#</span><span>Slack</span></span>
+            </div>
+            <span class="bf-url" id="bfUrl"><svg viewBox="0 0 12 14" aria-hidden="true"><rect x="1.5" y="6" width="9" height="6.5" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 6V4.3a2.5 2.5 0 0 1 5 0V6" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>mail.google.com</span>
+          </div>
+
+          <div class="bf-screens" id="bfScreens">
+          <div class="gm-app app-screen active" id="gmApp" data-app="gmail">
+            <div class="gm-topbar">
+              <span class="gm-iconbtn" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+              <span class="gm-logo" aria-hidden="true"><svg viewBox="0 0 24 18"><path fill="#4285f4" d="M1.636 18H5.82V8.727L0 4.364v12c0 .904.732 1.636 1.636 1.636z"/><path fill="#34a853" d="M18.18 18h4.184A1.636 1.636 0 0 0 24 16.364v-12l-5.82 4.363z"/><path fill="#fbbc04" d="M18.18 1.636v7.091L24 4.364V2.455c0-2.023-2.309-3.178-3.927-1.964z"/><path fill="#ea4335" d="M5.82 8.727v-7.09L12 6.272l6.18-4.636v7.09L12 13.365z"/><path fill="#c5221f" d="M0 2.455v1.909l5.82 4.363V1.636L4.017.491C2.398-.723 0 .432 0 2.455z"/></svg><span>Gmail</span></span>
+              <span class="gm-search" aria-hidden="true"><svg viewBox="0 0 18 18"><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 12l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>Search mail</span></span>
+              <span class="gm-top-right">
+                <span class="gm-iconbtn" aria-hidden="true"><svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="2.3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9 2v2.2M9 13.8V16M2 9h2.2M13.8 9H16M4.1 4.1l1.5 1.5M12.4 12.4l1.5 1.5M13.9 4.1l-1.5 1.5M5.6 12.4l-1.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+                <span class="gm-avatar" id="gmAvatar">Q</span>
+              </span>
+            </div>
+
+            <div class="gm-body">
+              <aside class="gm-rail" aria-hidden="true">
+                <button class="gm-compose" type="button" tabindex="-1"><svg viewBox="0 0 18 18"><path d="M2.5 15.5l.9-3.2 8.8-8.8a1.5 1.5 0 0 1 2.1 0l.2.2a1.5 1.5 0 0 1 0 2.1l-8.8 8.8z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Compose</span></button>
+                <div class="gm-rail-item active"><svg viewBox="0 0 18 18"><path d="M2.5 3h13v12h-13z M2.5 10.5h4.2c.4 1.3 1.2 2 2.3 2s1.9-.7 2.3-2h4.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Inbox</span><span class="gm-count" id="gmCount"></span></div>
+                <div class="gm-rail-item"><svg viewBox="0 0 18 18"><path d="M9 1.8l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L1.8 7.1l5-.7z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg><span>Starred</span></div>
+                <div class="gm-rail-item"><svg viewBox="0 0 18 18"><path d="M2 9l13.5-6-3.4 12-3.4-4.3L2 9zm6.7 1.7l5.4-6.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg><span>Sent</span></div>
+                <div class="gm-rail-item"><svg viewBox="0 0 18 18"><path d="M4.5 2h6l3 3v11h-9z M10.5 2v3h3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Drafts</span></div>
+                <div class="gm-rail-sep">Labels</div>
+                <div class="gm-rail-item"><span class="gm-label-dot"></span><span id="gmLabel">Quotes</span></div>
+              </aside>
+
+              <div class="gm-main">
+                <div class="gm-listbar">
+                  <span class="gm-cb" aria-hidden="true"></span>
+                  <span class="gm-iconbtn" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M14.5 7.5A5.8 5.8 0 0 0 4 5.8M3.5 10.5a5.8 5.8 0 0 0 10.5 1.7M4 2.5v3.3h3.3M14 15.5v-3.3h-3.3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  <span class="gm-iconbtn" aria-hidden="true"><svg viewBox="0 0 18 18"><circle cx="9" cy="3.5" r="1.4" fill="currentColor"/><circle cx="9" cy="9" r="1.4" fill="currentColor"/><circle cx="9" cy="14.5" r="1.4" fill="currentColor"/></svg></span>
+                  <span class="gm-range" id="gmRange"></span>
+                </div>
+                <div class="gm-list" id="gmList" aria-live="off">
+                  <div class="gm-empty" id="gmEmpty"><svg viewBox="0 0 18 18"><path d="M2.5 3h13v12h-13z M2.5 10.5h4.2c.4 1.3 1.2 2 2.3 2s1.9-.7 2.3-2h4.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg><span>Nothing new yet. The agent is watching this inbox.</span></div>
+                </div>
+                <div class="gm-read hidden" id="gmRead"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rap-app app-screen" id="rapApp" data-app="rapaport" aria-hidden="true">
+            <div class="rap-head">
+              <span class="rap-logo">PRICE&nbsp;MODEL</span>
+              <span class="rap-sub">our model, trained on Rapaport</span>
+              <span class="rap-live"><i></i>PREDICTING</span>
+            </div>
+            <div class="rap-body">
+              <div class="rap-search">
+                <svg viewBox="0 0 18 18"><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 12l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span class="rap-query" id="rapQuery"></span>
+              </div>
+              <div class="rap-cols">
+                <div class="rap-panel rap-listings">
+                  <div class="rap-panel-h">Comparable set</div>
+                  <div class="rap-rows" id="rapRows"></div>
+                </div>
+                <div class="rap-panel rap-model" id="rapModel">
+                  <div class="rap-model-h">Fair value model</div>
+                  <div class="rap-pred">
+                    <span class="rap-pred-l">Predicting fair value</span>
+                    <div class="rap-bar"><i></i></div>
+                  </div>
+                  <div class="rap-out" id="rapOut"></div>
+                  <span class="rap-tag">Staged demo &middot; indicative</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slack-app app-screen" id="slackApp" data-app="slack" aria-hidden="true">
+            <div class="slack-rail">
+              <div class="slack-ws">Jewel Labs</div>
+              <div class="slack-ch active">quotes</div>
+              <div class="slack-ch">operations</div>
+              <div class="slack-ch">general</div>
+            </div>
+            <div class="slack-main">
+              <div class="slack-head">quotes</div>
+              <div class="slack-thread" id="slackThread"></div>
+              <div class="slack-compose" id="slackCompose">
+                <span class="slack-input" id="slackInput"></span>
+                <span class="slack-ph" id="slackPh">Message #quotes</span>
+                <button class="slack-send" id="slackSendBtn" type="button" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M2 9l13.5-6-3.4 12-3.4-4.3L2 9zm6.7 1.7l5.4-6.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>
+              </div>
+            </div>
+          </div>
+          </div><!-- /bf-screens -->
+
+          <div class="theater-finale hidden" id="theaterFinale"></div>
+        </div>
+
+        <aside class="agent-console" id="agentConsole" aria-label="Agent activity">
+          <div class="ac-head">
+            <span class="ac-dot" id="acDot"></span>
+            <div class="ac-id">
+              <div class="ac-name" id="acName">Quoting Agent</div>
+              <div class="ac-state" id="acState">Standing by</div>
+            </div>
+            <span class="ac-badge">LIVE</span>
+          </div>
+          <div class="ac-log" id="acLog" aria-live="off"></div>
+          <div class="ac-foot" id="acFoot">Standing by</div>
+        </aside>
+      </div>
+
+      <div class="theater-foot" data-anim="fade-up" data-delay="160">
+        <div class="theater-controls">
+          <button class="btn btn--ghost btn--sm" id="demoSkip" type="button">Skip to result</button>
+          <button class="btn btn--ghost btn--sm hidden" id="demoReplay" type="button">Replay</button>
+          <a class="sol-tool-link" id="demoCTA" href="https://studio.jewellabs.org" target="_blank" rel="noopener noreferrer">Try it yourself</a>
+        </div>
+        <a class="btn btn--primary" id="tryStudioBtn" href="https://studio.jewellabs.org" target="_blank" rel="noopener noreferrer">Try It Yourself →</a>
       </div>
     </section>
 
@@ -507,5 +642,33 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="app.js?v=26"></script>
   <script src="chat.js?v=9"></script>
+
+  <!-- ─── Agent Theater (live inbox demo) ─── -->
+  <script>
+    window.JL = window.JL || {};
+    JL.$ = function (id) { return document.getElementById(id); };
+    JL.esc = function (s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    };
+  </script>
+  <script src="js/demo-data.js?v=3"></script>
+  <script src="js/agent-demo.js?v=6"></script>
+  <script>
+    (function () {
+      var t = document.getElementById('theater');
+      if (!t || !('IntersectionObserver' in window)) return;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting && window.JL && JL.agentDemo) {
+            try { JL.agentDemo.play('quote'); } catch (e) {}
+            io.disconnect();
+          }
+        });
+      }, { threshold: 0.35 });
+      io.observe(t);
+    })();
+  </script>
 </body>
 </html>
