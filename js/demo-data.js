@@ -25,6 +25,7 @@ window.JL_DEMO = {
     filter: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2.5 4h13l-5 6v4.5l-3 1.5V10z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
     send: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 9l13.5-6-3.4 12-3.4-4.3L2 9zm6.7 1.7l5.4-6.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
     arrow: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3.5 9h11M10 4.5 14.5 9 10 13.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    clock: '<svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9 5.2V9l2.6 1.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
   },
 
   scenarios: {
@@ -38,7 +39,7 @@ window.JL_DEMO = {
       account: 'quotes@jewellabs.org',
       feature: 'q1', // worked end to end during the run to reveal the full quote
       cta: { href: 'https://studio.jewellabs.org', label: 'Try the agents yourself' },
-      openLine: 'Overnight inbox: 7 threads. Triage is classifying intent.',
+      openLine: 'Overnight inbox: 7 threads. Filters is classifying intent.',
       closeLines: [
         'Wrapping the run',
         '5 quotes sent, 2 threads filtered. Four agents, zero touch.',
@@ -49,8 +50,8 @@ window.JL_DEMO = {
         stat: '5 of 5',
         statLabel: 'Quote requests answered, unattended',
         rows: [
-          ['Agents coordinated', 'Triage, Quoting, Pricing, Comms'],
-          ['A2A messages', '11 exchanged over the run'],
+          ['Agents coordinated', 'Filters, Quoting, Pricing, Updates'],
+          ['A2A messages', '{a2a} exchanged over the run'],
           ['Owner notified', 'Slack, every quote'],
         ],
         note: 'Staged demo. Figures indicative. The studio runs the same agents on your own inbox.',

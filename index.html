@@ -37,7 +37,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=30" />
-  <link rel="stylesheet" href="agent-demo.css?v=7" />
+  <link rel="stylesheet" href="agent-demo.css?v=9" />
   <link rel="stylesheet" href="chat.css?v=2" />
 
   <!-- Structured data for search + AI answer engines (GEO) -->
@@ -249,7 +249,7 @@
             <h1 class="sr-only">Jewel Labs: Agentic AI for the Diamond, Jewelry and Rare-Metal Trade</h1>
           </div>
 
-          <p class="hero__subtitle hero__subtitle--glass" style="text-wrap:balance;">Agentic AI Infrastructure for the diamond, jewelry, and rare-metal trade. One private layer of agents that runs the desk.</p>
+          <p class="hero__subtitle hero__subtitle--glass" style="text-wrap:balance; max-width:600px;">Agentic AI infrastructure and an operations layer that runs the desk for the rare-metal, jewelry, and diamond trade.</p>
 
           <div class="hero__actions">
             <a href="https://studio.jewellabs.org" target="_blank" rel="noopener noreferrer" class="btn btn--primary">Try the Studio →</a>
@@ -538,11 +538,14 @@
             </div>
             <span class="ac-badge">A2A &middot; LIVE</span>
           </div>
+          <div class="ac-run" id="acRun" aria-hidden="true"></div>
           <div class="ac-roster" id="acRoster" aria-hidden="true"></div>
           <div class="ac-log" id="acLog" aria-live="off"></div>
           <div class="ac-foot" id="acFoot">Standing by</div>
         </aside>
       </div>
+
+      <p class="theater-note" data-anim="fade-up" data-delay="140">Every handoff runs over the open <strong>A2A protocol</strong> (Agent2Agent, JSON-RPC 2.0). Open any message to read the raw payload.</p>
 
       <div class="theater-foot" data-anim="fade-up" data-delay="160">
         <div class="theater-controls">
@@ -654,8 +657,8 @@
       });
     };
   </script>
-  <script src="js/demo-data.js?v=3"></script>
-  <script src="js/agent-demo.js?v=9"></script>
+  <script src="js/demo-data.js?v=5"></script>
+  <script src="js/agent-demo.js?v=12"></script>
   <script>
     (function () {
       var t = document.getElementById('theater');
@@ -665,7 +668,7 @@
         entries.forEach(function (en) {
           if (en.intersectionRatio >= 0.35) {
             // play once when it scrolls into view; never interrupt a running demo
-            if (!played && window.JL && JL.agentDemo) {
+            if (!played && window.JL && JL.agentDemo && !(JL.agentDemo.running && JL.agentDemo.running())) {
               played = true;
               try { JL.agentDemo.play('quote'); } catch (e) {}
             }

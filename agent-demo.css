@@ -1191,19 +1191,19 @@
 .ac-agent[data-status="active"] .ac-agent-dot { background: var(--agent-c); box-shadow: 0 0 9px var(--agent-c); animation: acPulse 1.4s ease-in-out infinite; }
 .ac-agent[data-status="done"] { opacity: 0.7; }
 .ac-agent[data-status="done"] .ac-agent-dot { background: var(--ok); box-shadow: none; }
-.ac-agent[data-agent="triage"]  { --agent-c: #b78ad6; --agent-soft: rgba(183,138,214,0.13); }
+.ac-agent[data-agent="filters"]  { --agent-c: #b78ad6; --agent-soft: rgba(183,138,214,0.13); }
 .ac-agent[data-agent="quoting"] { --agent-c: #8ab1d2; --agent-soft: rgba(138,177,210,0.13); }
 .ac-agent[data-agent="pricing"] { --agent-c: #5fc39c; --agent-soft: rgba(95,195,156,0.13); }
-.ac-agent[data-agent="comms"]   { --agent-c: #d8a86e; --agent-soft: rgba(216,168,110,0.13); }
+.ac-agent[data-agent="updates"]   { --agent-c: #d8a86e; --agent-soft: rgba(216,168,110,0.13); }
 
 /* A2A envelope in the stream */
 .a2a { border: 1px solid var(--hair); border-radius: 9px; padding: 8px 10px; background: rgba(255,255,255,0.025); animation: a2aIn .42s var(--ease-out) both; }
 .a2a-head { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .a2a-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 5px; letter-spacing: 0.01em; white-space: nowrap; }
-.a2a-tag[data-agent="triage"]  { color: #e0ccf4; background: rgba(183,138,214,0.18); }
+.a2a-tag[data-agent="filters"]  { color: #e0ccf4; background: rgba(183,138,214,0.18); }
 .a2a-tag[data-agent="quoting"] { color: #c8e0f2; background: rgba(138,177,210,0.18); }
 .a2a-tag[data-agent="pricing"] { color: #bff0dd; background: rgba(95,195,156,0.18); }
-.a2a-tag[data-agent="comms"]   { color: #f2ddbf; background: rgba(216,168,110,0.18); }
+.a2a-tag[data-agent="updates"]   { color: #f2ddbf; background: rgba(216,168,110,0.18); }
 .a2a-tag[data-agent="owner"]   { color: var(--ink-2); background: rgba(255,255,255,0.07); }
 .a2a-arrow { width: 13px; height: 13px; color: var(--muted); display: inline-flex; flex-shrink: 0; }
 .a2a-arrow svg { width: 100%; height: 100%; }
@@ -1218,3 +1218,44 @@
 
 @media (max-width: 980px) { .ac-roster { grid-template-columns: repeat(4, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .a2a, .ac-agent[data-status="active"] .ac-agent-dot { animation: none !important; } }
+
+/* scheduler trigger tag */
+.a2a-tag[data-agent="scheduler"] { color: #cdd2db; background: rgba(255,255,255,0.08); }
+
+/* run / task strip: scheduled trigger + live A2A task state */
+.ac-run { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--hair); flex-shrink: 0; }
+.ac-run-sched { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.01em; }
+.ac-run-sched svg { width: 12px; height: 12px; flex-shrink: 0; }
+.ac-run-task { margin-left: auto; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 5px; border: 1px solid var(--hair-strong); color: var(--muted); transition: all .3s var(--ease-out); }
+.ac-run-task[data-state="working"] { color: #cfe0ef; border-color: rgba(138,177,210,0.42); background: rgba(138,177,210,0.10); }
+.ac-run-task[data-state="completed"] { color: #b9ecd8; border-color: rgba(95,195,156,0.42); background: rgba(95,195,156,0.10); }
+.ac-run-count { font-family: var(--font-mono); font-size: 9px; color: var(--accent); letter-spacing: 0.02em; }
+
+/* inspectable raw JSON-RPC payload under each A2A envelope */
+.a2a-raw-btn { display: inline-block; margin-top: 7px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.03em; color: var(--muted); background: none; border: none; padding: 0; cursor: pointer; transition: color .2s var(--ease-out); }
+.a2a-raw-btn::before { content: "{ } "; opacity: 0.65; }
+.a2a-raw-btn:hover { color: var(--ink-2); }
+.a2a-raw { margin-top: 6px; padding: 9px 11px; border-radius: 7px; background: rgba(0,0,0,0.45); border: 1px solid var(--hair); font-family: var(--font-mono); font-size: 9.5px; line-height: 1.55; color: #a7b4c2; white-space: pre; overflow: auto; max-height: 230px; }
+.a2a-raw[hidden] { display: none; }
+
+/* explicit A2A-protocol caption under the demo */
+.theater-note { max-width: 640px; margin: 22px auto 0; text-align: center; font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+.theater-note strong { color: var(--ink-2); font-weight: 600; }
+
+/* ═══════ a16z / editorial refinement: sharp boxes, black-and-white ═══════ */
+/* crisp corners, no soft "cloth" rounding */
+.browser-frame, .agent-console, .theater-finale .finale-dark, .cert-mini { border-radius: 6px; }
+.a2a, .a2a-raw, .gm-read-photo, .slack-card, .rap-panel { border-radius: 4px; }
+.ac-agent, .ac-run-task, .a2a-tag, .a2a-raw-btn, .gm-chip, .bf-url, .ac-badge, .theater-tab { border-radius: 4px; }
+/* monochrome frame + tabs: remove the blue tint/glow */
+.browser-frame { box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 40px 90px rgba(0,0,0,0.66); }
+.theater-tab.active { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.26); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10); }
+.ac-badge { color: var(--ink-2); border-color: var(--hair-strong); }
+/* the agent team reads black-and-white: the name differentiates, not colour */
+.a2a-tag[data-agent] { color: #d7dbe2 !important; background: rgba(255,255,255,0.06) !important; border: 1px solid var(--hair); }
+.ac-agent[data-agent] { --agent-c: #e9ecf2; --agent-soft: rgba(255,255,255,0.05); }
+.ac-agent[data-status="active"] { box-shadow: 0 0 0 1px rgba(255,255,255,0.26), 0 7px 20px rgba(0,0,0,0.5); }
+.ac-agent[data-status="active"] .ac-agent-dot { background: #fff; box-shadow: 0 0 7px rgba(255,255,255,0.5); }
+.ac-agent[data-status="done"] .ac-agent-dot { background: rgba(255,255,255,0.5); box-shadow: none; }
+.ac-run-task[data-state="working"] { color: #e3e8f0; border-color: rgba(255,255,255,0.26); background: rgba(255,255,255,0.06); }
+.ac-run-task[data-state="completed"] { color: #fff; border-color: rgba(255,255,255,0.34); background: rgba(255,255,255,0.09); }

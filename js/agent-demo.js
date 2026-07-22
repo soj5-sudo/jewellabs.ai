@@ -22,20 +22,83 @@
   const I = D.icons;
   const LABELS = { quote: 'Quotes' };
   const DEFAULT = 'quote';
-  // the agent team that coordinates over the A2A protocol
+
+  /* ═══════════════════════════════════════════════════════════
+     A2A layer — a faithful in-browser client of the open A2A
+     (Agent2Agent) protocol. Messages are real JSON-RPC 2.0
+     `message/send` requests carrying A2A Message objects; agents
+     advertise Agent Cards; the work is an A2A Task with the real
+     lifecycle states; the run is a scheduled execution instance.
+     Spec: https://a2a-protocol.org  ·  JSON-RPC 2.0
+     ═══════════════════════════════════════════════════════════ */
+  const A2A_PROTO = '0.2.9';
+  // each agent advertises an Agent Card (served at /.well-known/agent-card.json by convention)
   const AGENTS = [
-    { id: 'triage', name: 'Triage', ico: 'filter' },
-    { id: 'quoting', name: 'Quoting', ico: 'diamond' },
-    { id: 'pricing', name: 'Pricing', ico: 'price' },
-    { id: 'comms', name: 'Comms', ico: 'send' },
+    { id: 'filters', name: 'Filters', ico: 'filter', card: {
+      name: 'Filters Agent', description: 'Classifies inbound threads by intent and routes quote requests.',
+      url: 'https://studio.jewellabs.org/a2a/filters', version: '1.2.0', protocolVersion: A2A_PROTO,
+      preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: true },
+      skills: [{ id: 'triage-inbox', name: 'Inbox triage', tags: ['classification', 'routing'] }] } },
+    { id: 'quoting', name: 'Quoting', ico: 'diamond', card: {
+      name: 'Quoting Agent', description: 'Owns the quote: renders the piece, requests a price, verifies margin, replies.',
+      url: 'https://studio.jewellabs.org/a2a/quoting', version: '2.0.1', protocolVersion: A2A_PROTO,
+      preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: true },
+      skills: [{ id: 'compose-quote', name: 'Compose quote', tags: ['render', 'quote'] }] } },
+    { id: 'pricing', name: 'Pricing', ico: 'price', card: {
+      name: 'Pricing Agent', description: 'Predicts fair value from a model trained on the Rapaport list and live metal.',
+      url: 'https://studio.jewellabs.org/a2a/pricing', version: '1.4.3', protocolVersion: A2A_PROTO,
+      preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: false, stateTransitionHistory: true },
+      skills: [{ id: 'fair-value', name: 'Fair value', tags: ['pricing', 'model'] }] } },
+    { id: 'updates', name: 'Updates', ico: 'send', card: {
+      name: 'Updates Agent', description: 'Notifies the owner in Slack and the client by email.',
+      url: 'https://studio.jewellabs.org/a2a/updates', version: '1.1.0', protocolVersion: A2A_PROTO,
+      preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: false },
+      skills: [{ id: 'notify', name: 'Notify', tags: ['slack', 'email'] }] } },
   ];
   const AGENT = {}; AGENTS.forEach((a) => { AGENT[a.id] = a; });
+  AGENT.scheduler = { id: 'scheduler', name: 'Scheduler' }; // the cron trigger (not a roster worker)
+
+  let _uid = 0;
+  function uid(p) { _uid += 1; return p + '-' + _uid.toString(36).padStart(4, '0'); }
+
+  // the scheduled run (Trigger.dev / Temporal 'run' object) and the A2A Task the agents share
+  let RUN = null;
+  let TASK = null;
+  function newRun() { return { id: uid('run'), trigger: { type: 'schedule', cron: '0 2 * * *', timezone: 'UTC', source: 'inbox.poll' }, status: 'EXECUTING', a2a: 0 }; }
+  function newTask() { return { kind: 'task', id: uid('task'), contextId: uid('ctx'), status: { state: 'submitted', timestamp: '2026-01-19T02:00:04Z' }, history: [], artifacts: [] }; }
+  function setTaskState(state) { if (TASK) { TASK.status = { state: state, timestamp: '2026-01-19T02:00:04Z' }; renderRun(); } }
+
+  // build a real A2A message/send request (JSON-RPC 2.0)
+  function a2aRequest(fromId, toId, intent, text, data) {
+    // A2A role: the caller sends role:"user"; a responding agent replies role:"agent"
+    const isResult = /(result|ack)$/.test(intent);
+    const parts = [{ kind: 'text', text: text }];
+    if (data) parts.push({ kind: 'data', data: data });
+    return {
+      jsonrpc: '2.0', id: uid('req'), method: 'message/send',
+      params: { message: {
+        role: isResult ? 'agent' : 'user', kind: 'message', messageId: uid('msg'),
+        taskId: TASK ? TASK.id : null, contextId: TASK ? TASK.contextId : null,
+        parts: parts,
+        metadata: { 'a2a/from': fromId, 'a2a/to': toId, 'a2a/intent': intent },
+      } },
+    };
+  }
+  // the bus: dispatch a real message and let the UI observe genuine traffic
+  const busListeners = [];
+  function busSend(req) {
+    if (RUN) { RUN.a2a += 1; renderRun(); }
+    if (TASK) TASK.history.push(req.params.message);
+    busListeners.forEach((l) => { try { l(req); } catch (e) {} });
+    return req;
+  }
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let els = null;
   let apps = null;
   let active = DEFAULT;
   let finished = false;
+  let running = false;     // a live timeline is in flight (guards against stray replays)
   let done = {};           // emailId -> processed (controls reply visibility)
   let unread = 0;
 
@@ -175,7 +238,7 @@
       '<div class="finale-stat">' + esc(f.stat) + '</div>' +
       '<p class="finale-stat-l">' + esc(f.statLabel) + '</p>' +
       '<div class="finale-rows">' + f.rows.map((r) =>
-        '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>').join('') + '</div>' +
+        '<div><span>' + esc(r[0]) + '</span><b>' + esc(String(r[1]).replace('{a2a}', RUN ? RUN.a2a : 0)) + '</b></div>').join('') + '</div>' +
       '<p class="finale-note">' + esc(f.note) + '</p>' +
       '</div>';
   }
@@ -258,9 +321,13 @@
     });
   }
   function agentsDone() { AGENTS.forEach((a) => setAgent(a.id, 'done')); }
-  // append a real-looking A2A protocol envelope (from -> to, intent, plain gloss)
-  function a2a(fromId, toId, intent, gloss) {
+  // render a real A2A message off the bus, with the raw JSON-RPC payload inspectable
+  function renderA2A(req) {
+    if (!els || !els.log) return;
+    const m = req.params.message, md = m.metadata || {};
+    const fromId = md['a2a/from'], toId = md['a2a/to'], intent = md['a2a/intent'];
     const f = AGENT[fromId] || { name: fromId }, to = AGENT[toId] || { name: toId };
+    const gloss = (m.parts.filter((p) => p.kind === 'text')[0] || {}).text || '';
     const div = document.createElement('div');
     div.className = 'a2a';
     div.innerHTML =
@@ -270,10 +337,23 @@
         '<span class="a2a-tag" data-agent="' + esc(toId) + '">' + esc(to.name) + '</span>' +
         '<span class="a2a-intent">' + esc(intent) + '</span>' +
       '</div>' +
-      '<div class="a2a-gloss">' + esc(gloss) + '</div>';
+      '<div class="a2a-gloss">' + esc(gloss) + '</div>' +
+      '<button class="a2a-raw-btn" type="button" aria-expanded="false">message/send &middot; JSON-RPC 2.0</button>' +
+      '<pre class="a2a-raw" hidden>' + esc(JSON.stringify(req, null, 2)) + '</pre>';
     els.log.appendChild(div);
     els.log.scrollTop = els.log.scrollHeight;
     if (AGENT[toId]) activate(toId);
+  }
+  // send an A2A handoff: build a genuine message and put it on the bus (the UI observes it)
+  function a2a(fromId, toId, intent, gloss, data) { busSend(a2aRequest(fromId, toId, intent, gloss, data)); }
+
+  // the run/task strip: scheduled trigger, live A2A task state, message count
+  function renderRun() {
+    if (!els.run || !RUN || !TASK) return;
+    els.run.innerHTML =
+      '<span class="ac-run-sched">' + (I.clock || '') + '<span>nightly &middot; ' + esc(RUN.trigger.cron) + ' UTC</span></span>' +
+      '<span class="ac-run-task" data-state="' + esc(TASK.status.state) + '">' + esc(TASK.status.state) + '</span>' +
+      '<span class="ac-run-count">' + RUN.a2a + ' A2A</span>';
   }
   function filterNoise(e) {
     const row = rowOf(e);
@@ -295,6 +375,7 @@
     els.log.innerHTML = '';
     resetApps();
     renderRoster();
+    RUN = newRun(); TASK = newTask(); renderRun();
     els.name.textContent = sc.teamName || sc.agentName;
     setState('Standing by'); setFoot('Standing by');
     els.dot.classList.remove('live');
@@ -348,7 +429,7 @@
   }
 
   function showFinale(sc, verdicts) {
-    finished = true;
+    finished = true; running = false;
     els.finale.innerHTML = finaleHTML(sc, verdicts);
     els.finale.classList.remove('hidden');
     els.dot.classList.remove('live');
@@ -459,7 +540,8 @@
 
     // Quoting picks up the routed request and asks Pricing for a value
     seq.at(t, () => { activate('quoting'); switchApp('gmail'); startProcess(e); setState('Quoting agent on ' + who); openEmail(e.id); });
-    seq.at(t + 750, () => a2a('quoting', 'pricing', 'price.request', 'Quoting asks Pricing for a fair value on ' + who + "'s piece."));
+    seq.at(t + 750, () => a2a('quoting', 'pricing', 'price.request', 'Quoting asks Pricing for a fair value on ' + who + "'s piece.",
+      { item: e.subject, stone: (e.reply && e.reply.spec && e.reply.spec[0] ? e.reply.spec[0][1] : ''), skill: 'fair-value' }));
     t += 2000;
 
     // Pricing agent runs the model on the price-model tab
@@ -468,7 +550,8 @@
     seq.at(t + 1500, () => { removeTyping(); rapListings(e); addLine('Reference and comparables pulled'); });
     seq.at(t + 2200, () => { rapPredict(); addLine('Predicting the fair value', 'sys'); addTyping(); });
     seq.at(t + 3400, () => { removeTyping(); rapResolve(e); });
-    seq.at(t + 3700, () => a2a('pricing', 'quoting', 'price.result', 'Pricing returns ' + price + ' fair value, high confidence.'));
+    seq.at(t + 3700, () => a2a('pricing', 'quoting', 'price.result', 'Pricing returns ' + price + ' fair value, high confidence.',
+      { fairValue: price, confidence: 0.94, basis: 'rapaport+spot' }));
     t += 4400;
 
     // Quoting assembles and verifies the quote
@@ -480,13 +563,13 @@
     // Quoting hands off to Comms, which messages the owner live in Slack
     const order = 'JL-' + (1042 + idx);
     const smsg = 'Quote ready. ' + who + ', order #' + order + ', ' + price + ' indicative.';
-    seq.at(t, () => a2a('quoting', 'comms', 'notify.owner', 'Quoting asks Comms to notify the owner in Slack.'));
-    seq.at(t + 750, () => { activate('comms'); switchApp('slack'); slackReset(); setState('Comms messaging the owner'); });
+    seq.at(t, () => a2a('quoting', 'updates', 'notify.owner', 'Quoting asks Updates to notify the owner in Slack.', { channel: 'slack', order: order, amount: price }));
+    seq.at(t + 750, () => { activate('updates'); switchApp('slack'); slackReset(); setState('Updates messaging the owner'); });
     let tc = t + 1150;
     for (let c = 0; c < smsg.length; c++) { const ch = smsg.charAt(c); seq.at(tc, () => slackTypeChar(ch)); tc += 40; }
     seq.at(tc + 260, () => addTyping());
     seq.at(tc + 700, () => { removeTyping(); slackSendMsg(e, smsg); setState('Owner notified'); addLine('Delivered to the owner in Slack', 'ok', true); });
-    seq.at(tc + 950, () => a2a('comms', 'quoting', 'notify.ack', 'Comms confirms the owner has the quote.'));
+    seq.at(tc + 950, () => a2a('updates', 'quoting', 'notify.ack', 'Updates confirms the owner has the quote.', { delivered: true, channel: 'slack' }));
     t = tc + 950 + 1500; // ~2s hold on the delivered message
 
     // Quoting sends the reply to the client
@@ -504,6 +587,7 @@
     if (!sc) return;
     if (reduce) { renderFinalState(active); return; }
     resetStage(sc);
+    running = true;
 
     const fe = sc.emails.find((e) => e.id === sc.feature) || sc.emails.find((e) => !e.noise);
     const quotes = sc.emails.filter((e) => !e.noise);
@@ -513,18 +597,25 @@
     // inbox fills with everything: quote requests and noise
     sc.emails.forEach((e, i) => { seq.at(t, () => arrive(e, i, sc)); t += 300; });
     t += 250;
-    seq.at(t, () => { els.dot.classList.add('live'); activate('triage'); setState('Triage scanning the inbox'); addLine(sc.openLine, 'sys'); });
-    t += 750;
+    // the run is fired by the schedule; the Task moves to 'working'; the Scheduler hands off to Filters
+    seq.at(t, () => {
+      els.dot.classList.add('live'); setTaskState('working');
+      a2a('scheduler', 'filters', 'run.dispatch', 'Scheduled run fired, inbox polled. ' + sc.emails.length + ' new threads to classify.',
+        { trigger: 'schedule', cron: '0 2 * * *', threads: sc.emails.length });
+      activate('filters'); setState('Filters classifying the inbox'); addLine('Searching threads, classifying intent by skill');
+    });
+    t += 1050;
 
-    // Triage: search, classify, filter the noise, route the quotes
-    seq.at(t, () => { switchApp('gmail'); setState('Triage classifying ' + sc.emails.length + ' threads'); addLine('Searching threads, classifying intent'); addTyping(); });
-    t += 1100;
+    // Filters: classify, filter the noise, route the quote requests
+    seq.at(t, () => { switchApp('gmail'); addTyping(); });
+    t += 700;
     noise.forEach((e) => {
       seq.at(t, () => { removeTyping(); startProcess(e); });
       seq.at(t + 320, () => filterNoise(e));
       t += 620;
     });
-    seq.at(t, () => { removeTyping(); a2a('triage', 'quoting', 'route.requests', quotes.length + ' quote requests routed to Quoting. ' + noise.length + ' non-quotes filtered out.'); });
+    seq.at(t, () => { removeTyping(); a2a('filters', 'quoting', 'route.requests', quotes.length + ' quote requests routed to Quoting. ' + noise.length + ' non-quotes filtered.',
+      { routed: quotes.length, filtered: noise.length, skill: 'triage-inbox' }); });
     t += 1300;
 
     // the featured request, worked end to end across the agent team
@@ -542,7 +633,7 @@
     t += 300;
     seq.at(t, () => { setState('Wrapping up'); agentsDone(); addLine(sc.closeLines[0], 'sys'); addTyping(); });
     t += 1300;
-    seq.at(t, () => { removeTyping(); addLine(sc.closeLines[1], 'done', true); switchApp('gmail'); showFinale(sc); });
+    seq.at(t, () => { removeTyping(); addLine(sc.closeLines[1], 'done', true); switchApp('gmail'); setTaskState('completed'); if (RUN) { RUN.status = 'COMPLETED'; renderRun(); } showFinale(sc); });
   }
 
   /* Skip target and reduced-motion path: the completed stage, no timers. */
@@ -570,12 +661,13 @@
     if (empty) empty.remove();
     unread = 0; setCount();
     els.range.textContent = quotes.length + ' quoted';
-    agentsDone();
-    addLine(sc.openLine, 'sys');
-    a2a('triage', 'quoting', 'route.requests', quotes.length + ' quote requests routed. ' + (sc.emails.length - quotes.length) + ' filtered.');
+    agentsDone(); setTaskState('working');
+    a2a('scheduler', 'filters', 'run.dispatch', 'Scheduled run fired, inbox polled. ' + sc.emails.length + ' new threads.', { trigger: 'schedule', cron: '0 2 * * *' });
+    a2a('filters', 'quoting', 'route.requests', quotes.length + ' quote requests routed. ' + (sc.emails.length - quotes.length) + ' filtered.', { routed: quotes.length });
     a2a('quoting', 'pricing', 'price.request', 'Fair value requested for each piece.');
-    a2a('pricing', 'quoting', 'price.result', 'Prices returned from the model.');
-    a2a('quoting', 'comms', 'notify.owner', 'Owner notified in Slack for every quote.');
+    a2a('pricing', 'quoting', 'price.result', 'Prices returned from the model.', { confidence: 0.94 });
+    a2a('quoting', 'updates', 'notify.owner', 'Owner notified in Slack for every quote.', { channel: 'slack' });
+    setTaskState('completed'); if (RUN) { RUN.status = 'COMPLETED'; renderRun(); }
     addLine(sc.closeLines[1], 'done', true);
     showFinale(sc);
     els.log.scrollTop = els.log.scrollHeight;
@@ -605,9 +697,20 @@
       state: $('acState'), foot: $('acFoot'), dot: $('acDot'),
       count: $('gmCount'), range: $('gmRange'), avatar: $('gmAvatar'),
       label: $('gmLabel'), cta: $('demoCTA'), skip: $('demoSkip'),
-      replay: $('demoReplay'), roster: $('acRoster'),
+      replay: $('demoReplay'), roster: $('acRoster'), run: $('acRun'),
     };
     for (const k in els) { if (!els[k]) return; } // fail open if the section is absent
+
+    // the UI observes real bus traffic; open any envelope to inspect the raw JSON-RPC
+    busListeners.push(renderA2A);
+    els.log.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.a2a-raw-btn');
+      if (!btn) return;
+      const pre = btn.nextElementSibling;
+      const wasHidden = pre.hasAttribute('hidden');
+      if (wasHidden) pre.removeAttribute('hidden'); else pre.setAttribute('hidden', '');
+      btn.setAttribute('aria-expanded', wasHidden ? 'true' : 'false');
+    });
 
     apps = {
       screens: document.querySelectorAll('#bfScreens .app-screen'),
@@ -636,7 +739,8 @@
     // public API used by the scroll-in autoplay
     JL.agentDemo = {
       play(key) { playScenario(key || DEFAULT); },
-      stop() { seq.cancel(); },
+      stop() { seq.cancel(); running = false; },
+      running() { return running; },
       reset() { resetStage(D.scenarios[active] || D.scenarios[DEFAULT]); },
     };
   }
