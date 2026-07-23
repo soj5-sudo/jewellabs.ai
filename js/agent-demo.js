@@ -31,7 +31,7 @@
      lifecycle states; the run is a scheduled execution instance.
      Spec: https://a2a-protocol.org  ·  JSON-RPC 2.0
      ═══════════════════════════════════════════════════════════ */
-  const A2A_PROTO = '0.2.9';
+  const A2A_PROTO = '0.3.0';
   // Wasi's three agents. Each advertises an Agent Card (served at
   // /.well-known/agent-card.json by convention). Quoting orchestrates; it runs
   // the inbox, the price model and the owner update itself, and hands the stone
@@ -68,14 +68,15 @@
 
   // build a real A2A message/send request (JSON-RPC 2.0)
   function a2aRequest(fromId, toId, intent, text, data) {
-    // A2A role: the caller sends role:"user"; a responding agent replies role:"agent"
-    const isResult = /(result|ack)$/.test(intent);
+    // A2A role marks the RPC side, not the speaker: every message/send request is
+    // client-sent, so role is always 'user'; role 'agent' only appears in
+    // server-generated messages (responses/streams).
     const parts = [{ kind: 'text', text: text }];
     if (data) parts.push({ kind: 'data', data: data });
     return {
       jsonrpc: '2.0', id: uid('req'), method: 'message/send',
       params: { message: {
-        role: isResult ? 'agent' : 'user', kind: 'message', messageId: uid('msg'),
+        role: 'user', kind: 'message', messageId: uid('msg'),
         taskId: TASK ? TASK.id : null, contextId: TASK ? TASK.contextId : null,
         parts: parts,
         metadata: { 'a2a/from': fromId, 'a2a/to': toId, 'a2a/intent': intent },
@@ -627,10 +628,11 @@
     seq.at(t + 1500, () => a2a('compliance', 'quoting', 'dds.result', 'Stone matches GIA, origin clean, G7 Due Diligence Statement ready.', { matched: true, origin: 'verified', statement: 'G7-DDS' }));
     t += 2300;
 
-    // 5. Quoting builds the quote
+    // 5. Quoting builds the quote; Wasi reviews it before it goes out
     seq.at(t, () => { activate('quoting'); setState('Quoting builds the quote'); });
     seq.at(t + 300, () => addLine('Rendered the piece, metal at spot'));
     seq.at(t + 1100, () => addLine('Margin checked against budget', 'ok', true));
+    seq.at(t + 1500, () => addHumanLine('Wasi', 'reviewed the quote, cleared to send'));
     t += 1900;
 
     // 6. Quoting notifies the owner (Slack)

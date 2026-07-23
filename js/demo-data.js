@@ -55,7 +55,7 @@ window.JL_DEMO = {
         rows: [
           ['In the workspace', 'You and Wasi, plus 3 agents'],
           ['A2A messages', '{a2a} exchanged over the run'],
-          ['Compliance', 'G7 DDS ready, origin verified'],
+          ['Artifacts', '5 quote replies, one G7 DDS, origin verified'],
         ],
         note: 'Staged demo. Figures indicative. The studio runs the same agents on your own inbox.',
       },
