@@ -32,31 +32,29 @@
      Spec: https://a2a-protocol.org  ·  JSON-RPC 2.0
      ═══════════════════════════════════════════════════════════ */
   const A2A_PROTO = '0.2.9';
-  // each agent advertises an Agent Card (served at /.well-known/agent-card.json by convention)
+  // Wasi's three agents. Each advertises an Agent Card (served at
+  // /.well-known/agent-card.json by convention). Quoting orchestrates; it runs
+  // the inbox, the price model and the owner update itself, and hands the stone
+  // plan to Cut and the origin check to Compliance over A2A.
   const AGENTS = [
-    { id: 'filters', name: 'Filters', ico: 'filter', card: {
-      name: 'Filters Agent', description: 'Classifies inbound threads by intent and routes quote requests.',
-      url: 'https://studio.jewellabs.org/a2a/filters', version: '1.2.0', protocolVersion: A2A_PROTO,
-      preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: true },
-      skills: [{ id: 'triage-inbox', name: 'Inbox triage', tags: ['classification', 'routing'] }] } },
     { id: 'quoting', name: 'Quoting', ico: 'diamond', card: {
-      name: 'Quoting Agent', description: 'Owns the quote: renders the piece, requests a price, verifies margin, replies.',
+      name: 'Quoting Agent', description: 'Runs the desk: reads the inbox, prices back of Rap, builds the quote, notifies the owner.',
       url: 'https://studio.jewellabs.org/a2a/quoting', version: '2.0.1', protocolVersion: A2A_PROTO,
       preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: true },
-      skills: [{ id: 'compose-quote', name: 'Compose quote', tags: ['render', 'quote'] }] } },
-    { id: 'pricing', name: 'Pricing', ico: 'price', card: {
-      name: 'Pricing Agent', description: 'Predicts fair value from a model trained on the Rapaport list and live metal.',
-      url: 'https://studio.jewellabs.org/a2a/pricing', version: '1.4.3', protocolVersion: A2A_PROTO,
+      skills: [{ id: 'compose-quote', name: 'Compose quote', tags: ['render', 'price', 'quote'] }] } },
+    { id: 'cut', name: 'Cut', ico: 'cut', card: {
+      name: 'Rough-Cut Planning Agent', description: 'Plans the rough stone: yield, make, and cut layout, trained on scan data.',
+      url: 'https://studio.jewellabs.org/a2a/cut', version: '1.3.0', protocolVersion: A2A_PROTO,
       preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: false, stateTransitionHistory: true },
-      skills: [{ id: 'fair-value', name: 'Fair value', tags: ['pricing', 'model'] }] } },
-    { id: 'updates', name: 'Updates', ico: 'send', card: {
-      name: 'Updates Agent', description: 'Notifies the owner in Slack and the client by email.',
-      url: 'https://studio.jewellabs.org/a2a/updates', version: '1.1.0', protocolVersion: A2A_PROTO,
-      preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: false },
-      skills: [{ id: 'notify', name: 'Notify', tags: ['slack', 'email'] }] } },
+      skills: [{ id: 'plan-rough', name: 'Plan rough', tags: ['rough-cut', 'yield'] }] } },
+    { id: 'compliance', name: 'Compliance', ico: 'shield', card: {
+      name: 'Compliance Agent', description: 'Cross-checks stones against grading-lab records, verifies origin, produces the G7 Due Diligence Statement.',
+      url: 'https://studio.jewellabs.org/a2a/compliance', version: '2.1.0', protocolVersion: A2A_PROTO,
+      preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: true },
+      skills: [{ id: 'g7-dds', name: 'G7 Due Diligence Statement', tags: ['compliance', 'origin', 'g7'] }] } },
   ];
   const AGENT = {}; AGENTS.forEach((a) => { AGENT[a.id] = a; });
-  AGENT.scheduler = { id: 'scheduler', name: 'Scheduler' }; // the cron trigger (not a roster worker)
+  AGENT.scheduler = { id: 'scheduler', name: 'Scheduler' }; // the cron trigger (not an agent)
 
   let _uid = 0;
   function uid(p) { _uid += 1; return p + '-' + _uid.toString(36).padStart(4, '0'); }
@@ -84,7 +82,33 @@
       } },
     };
   }
-  // the bus: dispatch a real message and let the UI observe genuine traffic
+  // The multiplayer workspace, like Google Docs for the desk: several people and
+  // the agents share ONE live session. Kept deliberately small — a couple of
+  // people and three agents, not a stream — so it reads at a glance.
+  // People facepile: You are always here; Wasi joins live.
+  let people = [];
+  function resetPeople() { people = [{ id: 'you', initial: 'Y', tone: 'you', name: 'You' }]; }
+  function renderPeople() {
+    if (!els.people) return;
+    els.people.innerHTML = people.map((p) =>
+      '<span class="ac-face2" data-tone="' + p.tone + '" title="' + esc(p.name) + '">' + esc(p.initial) + '</span>').join('');
+  }
+  // The three agents in the workspace and who is driving them right now.
+  const presence = { wasi: false, agents: false, active: null, done: {} };
+  function resetPresence() { presence.wasi = false; presence.agents = false; presence.active = null; presence.done = {}; }
+  function wasiJoin() {
+    if (presence.wasi) return;
+    presence.wasi = true;
+    people.push({ id: 'wasi', initial: 'W', tone: 'wasi', name: 'Wasi' });
+    renderPeople(); renderPresence();
+    addHumanLine('Wasi', 'just joined the workspace');
+  }
+  function agentsJoin() { if (presence.agents) return; presence.agents = true; renderPresence(); addLine("Wasi's agents joined: Quoting, Cut, Compliance", 'spawn'); }
+  function activate(id) { presence.active = id; renderPresence(); }
+  function markDone(id) { presence.done[id] = true; if (presence.active === id) presence.active = null; renderPresence(); }
+  function agentsDone() { AGENTS.forEach((a) => { presence.done[a.id] = true; }); presence.active = null; renderPresence(); }
+
+  // the bus: dispatch a real message and let the UI observe genuine traffic.
   const busListeners = [];
   function busSend(req) {
     if (RUN) { RUN.a2a += 1; renderRun(); }
@@ -298,29 +322,19 @@
   }
 
   function removeTyping() { const t = $('acTyping'); if (t) t.remove(); }
+  // a person acting in the shared session (join, watch, redirect, hand off)
+  function addHumanLine(name, text) {
+    const div = document.createElement('div');
+    div.className = 'ac-line human';
+    div.innerHTML = '<span class="ac-line-face">' + esc(String(name).charAt(0)) + '</span><span><b>' + esc(name) + '</b> ' + esc(text) + '</span>';
+    els.log.appendChild(div);
+    els.log.scrollTop = els.log.scrollHeight;
+  }
   function setState(s) { els.state.textContent = s; }
   function setFoot(s) { els.foot.textContent = s; }
   function setCount() { els.count.textContent = unread > 0 ? String(unread) : ''; }
 
   /* ═══════ multi-agent orchestration (A2A) ═══════ */
-  function renderRoster() {
-    if (!els.roster) return;
-    els.roster.innerHTML = AGENTS.map((a) =>
-      '<div class="ac-agent" data-agent="' + a.id + '" data-status="idle">' +
-        '<span class="ac-agent-ico">' + (I[a.ico] || I.diamond) + '</span>' +
-        '<span class="ac-agent-name">' + a.name + '</span>' +
-        '<span class="ac-agent-dot"></span>' +
-      '</div>').join('');
-  }
-  function agentChip(id) { return els.roster ? els.roster.querySelector('.ac-agent[data-agent="' + id + '"]') : null; }
-  function setAgent(id, status) { const c = agentChip(id); if (c) c.setAttribute('data-status', status); }
-  function activate(id) {
-    AGENTS.forEach((a) => {
-      const c = agentChip(a.id);
-      if (c && c.getAttribute('data-status') !== 'done') c.setAttribute('data-status', a.id === id ? 'active' : 'idle');
-    });
-  }
-  function agentsDone() { AGENTS.forEach((a) => setAgent(a.id, 'done')); }
   // render a real A2A message off the bus, with the raw JSON-RPC payload inspectable
   function renderA2A(req) {
     if (!els || !els.log) return;
@@ -355,6 +369,28 @@
       '<span class="ac-run-task" data-state="' + esc(TASK.status.state) + '">' + esc(TASK.status.state) + '</span>' +
       '<span class="ac-run-count">' + RUN.a2a + ' A2A</span>';
   }
+
+  // multiplayer, popped out: Wasi (a person) on the left, directing three agents
+  // on the right. One person, three agents — the whole session in one glance.
+  function renderPresence() {
+    if (!els.presence) return;
+    // The people live in the workspace bar above; here we show only the agents
+    // and who is working right now.
+    if (!presence.agents) {
+      els.presence.setAttribute('data-live', presence.wasi ? '1' : '0');
+      els.presence.innerHTML = '<span class="acp-standby">' + (presence.wasi ? 'Bringing agents in' : 'Session standing by') + '</span>';
+      return;
+    }
+    els.presence.setAttribute('data-live', '1');
+    const agents = AGENTS.map((a) => {
+      const st = presence.done[a.id] ? 'done' : (presence.active === a.id ? 'active' : 'idle');
+      return '<span class="acp-agent" data-agent="' + a.id + '" data-status="' + st + '" title="' + esc(a.card.name) + '">' +
+        '<span class="acp-bot">' + (I[a.ico] || I.diamond) + '</span>' +
+        '<span class="acp-name">' + esc(a.name) + '</span>' +
+      '</span>';
+    }).join('');
+    els.presence.innerHTML = '<span class="acp-agents">' + agents + '</span>';
+  }
   function filterNoise(e) {
     const row = rowOf(e);
     if (!row) return;
@@ -368,15 +404,13 @@
 
   /* ═══════ stage control ═══════ */
   function resetStage(sc) {
-    done = {}; unread = 0; finished = false;
+    done = {}; unread = 0; finished = false; resetPresence(); resetPeople();
     els.list.innerHTML = emptyHTML() + sc.emails.map(rowHTML).join('');
     els.read.classList.add('hidden'); els.read.innerHTML = '';
     els.finale.classList.add('hidden'); els.finale.innerHTML = '';
     els.log.innerHTML = '';
     resetApps();
-    renderRoster();
-    RUN = newRun(); TASK = newTask(); renderRun();
-    els.name.textContent = sc.teamName || sc.agentName;
+    RUN = newRun(); TASK = newTask(); renderRun(); renderPeople(); renderPresence();
     setState('Standing by'); setFoot('Standing by');
     els.dot.classList.remove('live');
     setCount(); els.range.textContent = '';
@@ -482,8 +516,10 @@
   function rapPredict() { if (apps && apps.rapModel) apps.rapModel.classList.remove('done'); }
   function rapResolve(e) {
     if (!apps || !apps.rapOut) return;
+    const disc = (e.reply && e.reply.rapDiscount) || '';
     apps.rapOut.innerHTML =
       '<div class="rap-out-row"><span>Comparable set</span><b>matched</b></div>' +
+      (disc ? '<div class="rap-out-row"><span>Back of Rap</span><b>' + esc(disc) + '</b></div>' : '') +
       '<div class="rap-out-row"><span>Metal</span><b>at spot</b></div>' +
       '<div class="rap-out-row total"><span>Fair value</span><b>' + esc(quoteOf(e)) + '</b></div>';
     if (apps.rapModel) apps.rapModel.classList.add('done');
@@ -538,39 +574,52 @@
 
     const who = e.from.name;
 
-    // Quoting picks up the routed request and asks Pricing for a value
-    seq.at(t, () => { activate('quoting'); switchApp('gmail'); startProcess(e); setState('Quoting agent on ' + who); openEmail(e.id); });
-    seq.at(t + 750, () => a2a('quoting', 'pricing', 'price.request', 'Quoting asks Pricing for a fair value on ' + who + "'s piece.",
-      { item: e.subject, stone: (e.reply && e.reply.spec && e.reply.spec[0] ? e.reply.spec[0][1] : ''), skill: 'fair-value' }));
-    t += 2000;
+    const stone = (e.reply && e.reply.spec && e.reply.spec[0] ? e.reply.spec[0][1] : '');
+    const rapDisc = (e.reply && e.reply.rapDiscount) || '';
 
-    // Pricing agent runs the model on the price-model tab
-    seq.at(t, () => { activate('pricing'); closeRead(); switchApp('rapaport'); setState('Pricing agent running the model'); });
+    // Quoting opens the request and hands the stone to Cut over A2A
+    seq.at(t, () => { activate('quoting'); switchApp('gmail'); startProcess(e); setState('Quoting on ' + who); openEmail(e.id); });
+    seq.at(t + 850, () => a2a('quoting', 'cut', 'plan.request', 'Quoting asks Cut to plan the stone and confirm the make.', { stone: stone, skill: 'plan-rough' }));
+    t += 2100;
+
+    // Cut plans the rough and returns yield + make
+    seq.at(t, () => { activate('cut'); setState('Cut planning the stone'); addLine('Planning the rough: yield and make'); });
+    seq.at(t + 900, () => a2a('cut', 'quoting', 'plan.result', 'Cut confirms the plan: make holds, yield is good.', { make: 'confirmed', yield: 'good', confidence: 0.92 }));
+    t += 1700;
+
+    // Quoting runs the price model itself, back of Rap
+    seq.at(t, () => { activate('quoting'); closeRead(); switchApp('rapaport'); setState('Quoting running the price model'); });
     seq.at(t + 600, () => { rapType(rapQueryFor(e)); addTyping(); });
-    seq.at(t + 1500, () => { removeTyping(); rapListings(e); addLine('Reference and comparables pulled'); });
-    seq.at(t + 2200, () => { rapPredict(); addLine('Predicting the fair value', 'sys'); addTyping(); });
-    seq.at(t + 3400, () => { removeTyping(); rapResolve(e); });
-    seq.at(t + 3700, () => a2a('pricing', 'quoting', 'price.result', 'Pricing returns ' + price + ' fair value, high confidence.',
-      { fairValue: price, confidence: 0.94, basis: 'rapaport+spot' }));
-    t += 4400;
+    seq.at(t + 1500, () => { removeTyping(); rapListings(e); addLine('Rapaport and comparables pulled'); });
+    seq.at(t + 2200, () => { rapPredict(); addLine('Pricing back of Rap', 'sys'); addTyping(); });
+    seq.at(t + 3400, () => { removeTyping(); rapResolve(e); if (rapDisc) addLine('Priced at ' + rapDisc.replace('-', '') + ' back of Rap', 'ok', true); });
+    t += 4100;
 
-    // Quoting assembles and verifies the quote
-    seq.at(t, () => { activate('quoting'); switchApp('gmail'); setState('Quoting building the quote'); });
-    seq.at(t + 300, () => addLine('Rendered the piece, metal added at spot'));
-    seq.at(t + 1100, () => addLine('Margin checked, verified against budget', 'ok', true));
+    // Wasi directs the compliance check; Quoting hands it to Compliance over A2A
+    seq.at(t, () => { switchApp('gmail'); closeRead(); setState('Wasi handing off compliance'); addHumanLine('Wasi', 'sent the origin check to Compliance'); });
+    seq.at(t + 900, () => a2a('quoting', 'compliance', 'dds.request', 'Verify the stone against its GIA report and check origin before the quote goes out.', { report: 'GIA', check: 'origin', skill: 'g7-dds' }));
     t += 1900;
 
-    // Quoting hands off to Comms, which messages the owner live in Slack
+    // Compliance cross-checks the grading records, verifies origin, prepares the G7 DDS
+    seq.at(t, () => { activate('compliance'); setState('Compliance running the checks'); addLine('Cross-checking the stone against GIA grading records'); });
+    seq.at(t + 1100, () => addLine('Origin verified, no mismatch. G7 DDS prepared.', 'ok', true));
+    seq.at(t + 1500, () => a2a('compliance', 'quoting', 'dds.result', 'Stone matches the GIA report, origin clean, G7 Due Diligence Statement ready.', { matched: true, origin: 'verified', statement: 'G7-DDS' }));
+    t += 2300;
+
+    // Quoting assembles the quote and notifies the owner in Slack itself
+    seq.at(t, () => { activate('quoting'); switchApp('gmail'); setState('Quoting building the quote'); });
+    seq.at(t + 300, () => addLine('Rendered the piece, metal at spot'));
+    seq.at(t + 1100, () => addLine('Margin checked against budget', 'ok', true));
+    t += 1900;
+
     const order = 'JL-' + (1042 + idx);
     const smsg = 'Quote ready. ' + who + ', order #' + order + ', ' + price + ' indicative.';
-    seq.at(t, () => a2a('quoting', 'updates', 'notify.owner', 'Quoting asks Updates to notify the owner in Slack.', { channel: 'slack', order: order, amount: price }));
-    seq.at(t + 750, () => { activate('updates'); switchApp('slack'); slackReset(); setState('Updates messaging the owner'); });
-    let tc = t + 1150;
+    seq.at(t, () => { activate('quoting'); switchApp('slack'); slackReset(); setState('Quoting messaging the owner'); });
+    let tc = t + 500;
     for (let c = 0; c < smsg.length; c++) { const ch = smsg.charAt(c); seq.at(tc, () => slackTypeChar(ch)); tc += 40; }
     seq.at(tc + 260, () => addTyping());
-    seq.at(tc + 700, () => { removeTyping(); slackSendMsg(e, smsg); setState('Owner notified'); addLine('Delivered to the owner in Slack', 'ok', true); });
-    seq.at(tc + 950, () => a2a('updates', 'quoting', 'notify.ack', 'Updates confirms the owner has the quote.', { delivered: true, channel: 'slack' }));
-    t = tc + 950 + 1500; // ~2s hold on the delivered message
+    seq.at(tc + 700, () => { removeTyping(); slackSendMsg(e, smsg); setState('Owner notified'); addLine('Owner notified in Slack', 'ok', true); });
+    t = tc + 700 + 1500; // ~2s hold on the delivered message
 
     // Quoting sends the reply to the client
     seq.at(t, () => { activate('quoting'); switchApp('gmail'); finishProcess(e, idx, sc); openEmail(e.id); setState('Reply sent to ' + who); addLine('Reply sent, indicative ' + price, 'done', true); });
@@ -597,26 +646,27 @@
     // inbox fills with everything: quote requests and noise
     sc.emails.forEach((e, i) => { seq.at(t, () => arrive(e, i, sc)); t += 300; });
     t += 250;
-    // the run is fired by the schedule; the Task moves to 'working'; the Scheduler hands off to Filters
+    // Wasi opens the session; the scheduled run fires and the Task starts working
+    seq.at(t, () => { wasiJoin(); setState('Wasi joined the session'); });
+    t += 900;
     seq.at(t, () => {
       els.dot.classList.add('live'); setTaskState('working');
-      a2a('scheduler', 'filters', 'run.dispatch', 'Scheduled run fired, inbox polled. ' + sc.emails.length + ' new threads to classify.',
+      agentsJoin(); setState("Wasi's agents on the desk");
+      a2a('scheduler', 'quoting', 'run.dispatch', 'Scheduled run fired, inbox polled. ' + sc.emails.length + ' new threads.',
         { trigger: 'schedule', cron: '0 2 * * *', threads: sc.emails.length });
-      activate('filters'); setState('Filters classifying the inbox'); addLine('Searching threads, classifying intent by skill');
     });
     t += 1050;
 
-    // Filters: classify, filter the noise, route the quote requests
-    seq.at(t, () => { switchApp('gmail'); addTyping(); });
+    // Quoting reads the inbox and sets aside the non-quotes itself
+    seq.at(t, () => { activate('quoting'); switchApp('gmail'); setState('Quoting reading the inbox'); addLine('Reading the inbox, setting aside non-quotes'); addTyping(); });
     t += 700;
     noise.forEach((e) => {
       seq.at(t, () => { removeTyping(); startProcess(e); });
       seq.at(t + 320, () => filterNoise(e));
       t += 620;
     });
-    seq.at(t, () => { removeTyping(); a2a('filters', 'quoting', 'route.requests', quotes.length + ' quote requests routed to Quoting. ' + noise.length + ' non-quotes filtered.',
-      { routed: quotes.length, filtered: noise.length, skill: 'triage-inbox' }); });
-    t += 1300;
+    seq.at(t, () => { removeTyping(); addLine(quotes.length + ' quote requests queued, ' + noise.length + ' filtered', 'ok', true); });
+    t += 1100;
 
     // the featured request, worked end to end across the agent team
     t = scheduleFeature(fe, sc, t);
@@ -661,13 +711,14 @@
     if (empty) empty.remove();
     unread = 0; setCount();
     els.range.textContent = quotes.length + ' quoted';
-    agentsDone(); setTaskState('working');
-    a2a('scheduler', 'filters', 'run.dispatch', 'Scheduled run fired, inbox polled. ' + sc.emails.length + ' new threads.', { trigger: 'schedule', cron: '0 2 * * *' });
-    a2a('filters', 'quoting', 'route.requests', quotes.length + ' quote requests routed. ' + (sc.emails.length - quotes.length) + ' filtered.', { routed: quotes.length });
-    a2a('quoting', 'pricing', 'price.request', 'Fair value requested for each piece.');
-    a2a('pricing', 'quoting', 'price.result', 'Prices returned from the model.', { confidence: 0.94 });
-    a2a('quoting', 'updates', 'notify.owner', 'Owner notified in Slack for every quote.', { channel: 'slack' });
+    wasiJoin(); agentsJoin(); agentsDone(); setTaskState('working');
+    a2a('scheduler', 'quoting', 'run.dispatch', 'Scheduled run fired, inbox polled. ' + sc.emails.length + ' new threads.', { trigger: 'schedule', cron: '0 2 * * *' });
+    a2a('quoting', 'cut', 'plan.request', 'Rough-cut plan requested for each piece.', { skill: 'plan-rough' });
+    a2a('cut', 'quoting', 'plan.result', 'Plans confirmed, make holds.', { make: 'confirmed' });
+    a2a('quoting', 'compliance', 'dds.request', 'Stones cross-checked against grading records, origin verified.', { skill: 'g7-dds' });
+    a2a('compliance', 'quoting', 'dds.result', 'Origin clean, G7 Due Diligence Statement prepared.', { statement: 'G7-DDS' });
     setTaskState('completed'); if (RUN) { RUN.status = 'COMPLETED'; renderRun(); }
+    addHumanLine('Wasi', 'reviewed the run in the shared session');
     addLine(sc.closeLines[1], 'done', true);
     showFinale(sc);
     els.log.scrollTop = els.log.scrollHeight;
@@ -693,11 +744,11 @@
   function init() {
     els = {
       stage: $('theaterStage'), list: $('gmList'), read: $('gmRead'),
-      finale: $('theaterFinale'), log: $('acLog'), name: $('acName'),
+      finale: $('theaterFinale'), log: $('acLog'), people: $('acPeople'),
       state: $('acState'), foot: $('acFoot'), dot: $('acDot'),
       count: $('gmCount'), range: $('gmRange'), avatar: $('gmAvatar'),
       label: $('gmLabel'), cta: $('demoCTA'), skip: $('demoSkip'),
-      replay: $('demoReplay'), roster: $('acRoster'), run: $('acRun'),
+      replay: $('demoReplay'), presence: $('acPresence'), run: $('acRun'),
     };
     for (const k in els) { if (!els[k]) return; } // fail open if the section is absent
 

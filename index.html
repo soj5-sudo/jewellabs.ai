@@ -37,7 +37,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=31" />
-  <link rel="stylesheet" href="agent-demo.css?v=9" />
+  <link rel="stylesheet" href="agent-demo.css?v=17" />
   <link rel="stylesheet" href="chat.css?v=2" />
 
   <!-- Structured data for search + AI answer engines (GEO) -->
@@ -249,7 +249,7 @@
             <h1 class="sr-only">Jewel Labs: Agentic AI for the Diamond, Jewelry and Rare-Metal Trade</h1>
           </div>
 
-          <p class="hero__subtitle hero__subtitle--glass">Agentic AI infrastructure and an operations layer that runs<br class="hero-br" />the desk for the rare-metal, jewelry, and diamond trade.</p>
+          <p class="hero__subtitle hero__subtitle--glass">Agentic, multiplayer AI infrastructure for the rare-metal, jewelry, and diamond trade.</p>
 
           <div class="hero__actions">
             <a href="https://studio.jewellabs.org" target="_blank" rel="noopener noreferrer" class="btn btn--primary">Try the Studio →</a>
@@ -423,9 +423,9 @@
     <!-- ─── AGENT THEATER (the quoting agent, live) ─── -->
     <section class="theater" id="theater" aria-label="Live quoting agent demo">
       <div class="section__head" data-anim="fade-up">
-        <p class="eyebrow">Live demo · Quoting Agent</p>
+        <p class="eyebrow">Live demo · Multiplayer workspace</p>
         <h2 class="section__title theater-title">AI agents that do<br/><em>the work for you.</em></h2>
-        <p class="section__sub">Agents run it all in the background and report back to you.</p>
+        <p class="section__sub">Like Google Docs for the trade: quoting, cutting, and compliance agents run a desk your whole team shares.</p>
       </div>
 
       <div class="theater-stage" id="theaterStage" data-anim="fade-up" data-delay="120">
@@ -481,7 +481,7 @@
           <div class="rap-app app-screen" id="rapApp" data-app="rapaport" aria-hidden="true">
             <div class="rap-head">
               <span class="rap-logo">PRICE&nbsp;MODEL</span>
-              <span class="rap-sub">our model, trained on Rapaport</span>
+              <span class="rap-sub">prices each stone as a discount to the Rapaport list</span>
               <span class="rap-live"><i></i>PREDICTING</span>
             </div>
             <div class="rap-body">
@@ -529,23 +529,41 @@
           <div class="theater-finale hidden" id="theaterFinale"></div>
         </div>
 
-        <aside class="agent-console" id="agentConsole" aria-label="Agent team activity">
-          <div class="ac-head">
-            <span class="ac-dot" id="acDot"></span>
-            <div class="ac-id">
-              <div class="ac-name" id="acName">Agent Team</div>
-              <div class="ac-state" id="acState">Standing by</div>
-            </div>
-            <span class="ac-badge">A2A &middot; LIVE</span>
+        <aside class="agent-console" id="agentConsole" aria-label="Multiplayer agent workspace">
+          <div class="ac-ws">
+            <span class="ac-ws-live" id="acDot" aria-hidden="true"></span>
+            <span class="ac-ws-label">MULTIPLAYER WORKSPACE</span>
+            <span class="ac-ws-people" id="acPeople" aria-hidden="true"></span>
+            <button class="ac-ws-share" type="button" tabindex="-1" aria-hidden="true" title="Shareable workspace">
+              <svg viewBox="0 0 18 18"><circle cx="5" cy="9" r="1.9" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="13" cy="4.6" r="1.9" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="13" cy="13.4" r="1.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6.7 8.1l4.6-2.6M6.7 9.9l4.6 2.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Share
+            </button>
           </div>
+          <div class="ac-state" id="acState">Standing by</div>
           <div class="ac-run" id="acRun" aria-hidden="true"></div>
-          <div class="ac-roster" id="acRoster" aria-hidden="true"></div>
+          <div class="ac-presence" id="acPresence" aria-hidden="true"></div>
           <div class="ac-log" id="acLog" aria-live="off"></div>
           <div class="ac-foot" id="acFoot">Standing by</div>
         </aside>
       </div>
 
-      <p class="theater-note" data-anim="fade-up" data-delay="140">Every handoff runs over the open <strong>A2A protocol</strong> (Agent2Agent, JSON-RPC 2.0). Open any message to read the raw payload.</p>
+      <div class="infra" data-anim="fade-up" data-delay="140">
+        <p class="infra-thesis">One engine we build and the agents run on. A different rule book for each trade.</p>
+        <div class="infra-grid">
+          <div class="infra-item">
+            <span class="infra-k">Multiplayer</span>
+            <span class="infra-v">People and agents in one live session. Watch, step in, hand off.</span>
+          </div>
+          <div class="infra-item">
+            <span class="infra-k">One engine</span>
+            <span class="infra-v">Quoting, cutting, compliance. A rule book per trade.</span>
+          </div>
+          <div class="infra-item">
+            <span class="infra-k">Fine-tuned models</span>
+            <span class="infra-v">Trained on millions of graded diamonds and the G7 record.</span>
+          </div>
+        </div>
+      </div>
 
       <div class="theater-foot" data-anim="fade-up" data-delay="160">
         <div class="theater-controls">
@@ -657,8 +675,8 @@
       });
     };
   </script>
-  <script src="js/demo-data.js?v=5"></script>
-  <script src="js/agent-demo.js?v=12"></script>
+  <script src="js/demo-data.js?v=8"></script>
+  <script src="js/agent-demo.js?v=20"></script>
   <script>
     (function () {
       var t = document.getElementById('theater');

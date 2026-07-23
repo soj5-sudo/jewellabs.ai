@@ -26,6 +26,9 @@ window.JL_DEMO = {
     send: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 9l13.5-6-3.4 12-3.4-4.3L2 9zm6.7 1.7l5.4-6.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
     arrow: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3.5 9h11M10 4.5 14.5 9 10 13.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     clock: '<svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9 5.2V9l2.6 1.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+    cut: '<svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="5" cy="5" r="2.2" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="5" cy="13" r="2.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6.9 6.4 15 13M6.9 11.6 15 5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+    shield: '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2.2 15 4.3v4.2c0 3.4-2.4 6-6 7.3-3.6-1.3-6-3.9-6-7.3V4.3z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.4 8.8 8.3 10.7 11.9 6.9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    person: '<svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="6" r="2.8" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M3.6 15.2a5.4 5.4 0 0 1 10.8 0" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
   },
 
   scenarios: {
@@ -35,14 +38,14 @@ window.JL_DEMO = {
       key: 'quote',
       teamName: 'Agent Team',
       agentName: 'Quoting Agent',
-      agentSub: 'Four agents, one desk, coordinating over A2A',
+      agentSub: 'Wasi and three agents, one shared session, over A2A',
       account: 'quotes@jewellabs.org',
       feature: 'q1', // worked end to end during the run to reveal the full quote
       cta: { href: 'https://studio.jewellabs.org', label: 'Try the agents yourself' },
-      openLine: 'Overnight inbox: 7 threads. Filters is classifying intent.',
+      openLine: 'Overnight inbox: 7 threads. Quoting is reading the inbox.',
       closeLines: [
         'Wrapping the run',
-        '5 quotes sent, 2 threads filtered. Four agents, zero touch.',
+        '5 quotes sent, 2 filtered. Wasi and three agents, one session.',
       ],
       finaleState: '5 quotes sent',
       finale: {
@@ -50,9 +53,9 @@ window.JL_DEMO = {
         stat: '5 of 5',
         statLabel: 'Quote requests answered, unattended',
         rows: [
-          ['Agents coordinated', 'Filters, Quoting, Pricing, Updates'],
+          ['In the session', 'Wasi, directing Quoting, Cut, Compliance'],
           ['A2A messages', '{a2a} exchanged over the run'],
-          ['Owner notified', 'Slack, every quote'],
+          ['Compliance', 'G7 DDS prepared, origin verified'],
         ],
         note: 'Staged demo. Figures indicative. The studio runs the same agents on your own inbox.',
       },
@@ -89,9 +92,11 @@ window.JL_DEMO = {
 'Hi, I am looking for an engagement ring. A 2 carat oval solitaire on a thin platinum band, something clean and classic. Budget is around 20 to 24k. Could you show me what it would look like and give me a price? The wedding is in October so there is time.',
           reply: {
             img: 'assets/rings/solitaire.jpg',
-            intro: 'Thank you for the brief. Here is the piece as described, with an indicative figure. The price is worked from the Rapaport list and live metal, not a guess.',
+            rapDiscount: '-30%',
+            intro: 'Thank you for the brief. Here is the piece as described, with an indicative figure. The price is worked back of the Rapaport list and live metal, not a guess.',
             priceBasis: [
               ['Rapaport price list', 'RAPI 2.00 ct oval, D to F, VS'],
+              ['Back of Rap', '-30%, indicative'],
               ['Live comparison', 'three matched listings'],
               ['Metal', 'Platinum 950 at spot'],
             ],
@@ -121,9 +126,11 @@ window.JL_DEMO = {
 'Tennis bracelet for our tenth anniversary. Something around 5 carats total, white gold, classic four prong line. What are we looking at price wise, and how long to make?',
           reply: {
             img: 'assets/rings/tennis.jpg',
+            rapDiscount: '-24%',
             intro: 'Congratulations on the tenth. Classic line bracelet below, sized to a 6.5 inch wrist unless you tell us otherwise.',
             priceBasis: [
               ['Rapaport price list', '45 rounds, G to H, VS, per carat'],
+              ['Back of Rap', '-24%, indicative'],
               ['Live comparison', 'four matched listings'],
               ['Metal', '18k white gold at spot'],
             ],
@@ -153,9 +160,11 @@ window.JL_DEMO = {
 'Do you make signet rings? I want one in yellow gold with a small stone set flush into the face. Classic, nothing flashy. Open to engraving later.',
           reply: {
             img: 'assets/rings/signet.jpg',
+            rapDiscount: '-34%',
             intro: 'We do. Oval face signet below, stone set flush so it reads as a detail, not a feature. Engraving can be added any time.',
             priceBasis: [
               ['Rapaport price list', '0.15 ct round, flush set'],
+              ['Back of Rap', '-34%, indicative'],
               ['Gold weight', '9.4 g, 18k yellow at spot'],
               ['Making', 'oval face, hand finished'],
             ],
@@ -185,9 +194,11 @@ window.JL_DEMO = {
 'I want a full eternity band, size 6, to stack with my engagement ring. Platinum. Around 2 carats total. Shared prong if that keeps it low profile.',
           reply: {
             img: 'assets/rings/eternity.jpg',
+            rapDiscount: '-22%',
             intro: 'Shared prong keeps the profile low and lets the stones run edge to edge. Note that full eternity bands cannot be resized, so we confirm size twice.',
             priceBasis: [
               ['Rapaport price list', '21 rounds, F to G, VS, per carat'],
+              ['Back of Rap', '-22%, indicative'],
               ['Live comparison', 'three matched listings'],
               ['Metal', 'Platinum 950 at spot'],
             ],
@@ -217,9 +228,11 @@ window.JL_DEMO = {
 'Diamond studs under 2k, for my daughter, she graduates in May. Screw backs so she does not lose them. White metal.',
           reply: {
             img: 'assets/rings/studs.jpg',
+            rapDiscount: '-28%',
             intro: 'Matched pair below with screw backs as asked. A quarter carat each side wears clean and stays under budget.',
             priceBasis: [
               ['Rapaport price list', '2 rounds, G, SI1, per carat'],
+              ['Back of Rap', '-28%, indicative'],
               ['Live comparison', 'three matched listings'],
               ['Metal', '18k white gold at spot'],
             ],

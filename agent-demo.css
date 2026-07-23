@@ -1180,7 +1180,7 @@
 .theater .eyebrow { margin-bottom: 13px; }
 
 /* ═══════ MULTI-AGENT ORCHESTRATION (A2A) ═══════ */
-.ac-roster { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 11px 12px; border-bottom: 1px solid var(--hair); flex-shrink: 0; }
+.ac-roster { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 11px 12px; border-bottom: 1px solid var(--hair); flex-shrink: 0; }
 .ac-agent { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 9px 4px 8px; border-radius: 10px; border: 1px solid var(--hair); background: rgba(255,255,255,0.02); transition: border-color .3s var(--ease-out), background .3s var(--ease-out), box-shadow .3s var(--ease-out), opacity .3s var(--ease-out); }
 .ac-agent-ico { width: 19px; height: 19px; color: var(--muted); transition: color .3s var(--ease-out); }
 .ac-agent-ico svg { width: 100%; height: 100%; }
@@ -1216,7 +1216,7 @@
 .gm-row.gm-filtered .gm-sender, .gm-row.gm-filtered .gm-subj { font-weight: 400; }
 .gm-chip.muted { background: #eef0f2; color: #80868b; }
 
-@media (max-width: 980px) { .ac-roster { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 980px) { .ac-roster { grid-template-columns: repeat(3, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .a2a, .ac-agent[data-status="active"] .ac-agent-dot { animation: none !important; } }
 
 /* scheduler trigger tag */
@@ -1259,3 +1259,138 @@
 .ac-agent[data-status="done"] .ac-agent-dot { background: rgba(255,255,255,0.5); box-shadow: none; }
 .ac-run-task[data-state="working"] { color: #e3e8f0; border-color: rgba(255,255,255,0.26); background: rgba(255,255,255,0.06); }
 .ac-run-task[data-state="completed"] { color: #fff; border-color: rgba(255,255,255,0.34); background: rgba(255,255,255,0.09); }
+
+/* ═══════ infra strip: agents, the rails, the dev tools (signal, not fluff) ═══════ */
+.infra { max-width: 880px; margin: 26px auto 0; }
+.infra-thesis { text-align: center; font-size: 13.5px; font-weight: 500; color: var(--ink-2); margin-bottom: 14px; }
+.infra-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.infra-item { border: 1px solid var(--hair); border-radius: 4px; padding: 13px 15px; background: rgba(255,255,255,0.02); display: flex; flex-direction: column; gap: 6px; }
+.infra-k { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); }
+.infra-v { font-size: 12px; line-height: 1.55; color: var(--muted); }
+@media (max-width: 700px) { .infra-grid { grid-template-columns: 1fr; } .infra { margin-top: 22px; } }
+
+/* ═══════ multiplayer: the shared session strip (one live context, N agents joined) ═══════ */
+.ac-session {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 12px; border-bottom: 1px solid var(--hair); flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+.ac-ses-l {
+  font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.ac-ses-l::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,0.28); transition: background .3s var(--ease-out), box-shadow .3s var(--ease-out);
+}
+.ac-session[data-live="1"] .ac-ses-l::before { background: #fff; box-shadow: 0 0 7px rgba(255,255,255,0.55); }
+.ac-ses-ctx {
+  font-size: 9.5px; color: var(--dim); letter-spacing: 0.02em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ac-ses-n { margin-left: auto; font-size: 9.5px; color: var(--muted); letter-spacing: 0.02em; white-space: nowrap; }
+.ac-ses-n b { color: var(--ink); font-weight: 600; }
+
+/* ═══════ multiplayer presence: a Google-Docs facepile of who is in the session ═══════ */
+.ac-ses-ctx { flex: 0 1 auto; min-width: 0; }
+.ac-ses-pile { margin-left: auto; display: inline-flex; align-items: center; flex-shrink: 0; }
+.ac-face {
+  width: 17px; height: 17px; border-radius: 50%; margin-left: -5px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #14171c; color: var(--ink-2);
+  box-shadow: 0 0 0 1.5px #0b0d10, 0 0 0 2.5px var(--hair-strong);
+  animation: acFaceIn .34s var(--ease-out) both;
+}
+.ac-face:first-child { margin-left: 0; }
+.ac-face svg { width: 10px; height: 10px; }
+.ac-face-human {
+  background: #eef1f6; color: #0b0d10; font-family: var(--font-ui);
+  font-size: 8.5px; font-weight: 700;
+  box-shadow: 0 0 0 1.5px #0b0d10, 0 0 0 2.5px rgba(255,255,255,0.55);
+}
+@keyframes acFaceIn { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
+
+/* a person acting in the log (join, watch, redirect, hand off) */
+.ac-line.human { color: var(--ink-2); }
+.ac-line.human b { color: var(--ink); font-weight: 600; }
+.ac-line-face {
+  width: 15px; height: 15px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+  background: #eef1f6; color: #0b0d10; font-family: var(--font-ui);
+  font-size: 8px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+@media (prefers-reduced-motion: reduce) { .ac-face { animation: none !important; } }
+
+/* compliance narrative lead under the theater head */
+.theater-lead { margin: 16px auto 0; max-width: 620px; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+
+/* ═══════ agent lifecycle: dormant → spawned → active → retired ═══════ */
+/* dormant: a specialist on standby, not yet spun up */
+.ac-agent[data-status="dormant"] { opacity: 0.38; border-style: dashed; }
+.ac-agent[data-status="dormant"] .ac-agent-dot { background: transparent; box-shadow: inset 0 0 0 1px var(--hair-strong); }
+/* spawned: a brief pop as a parent agent creates it */
+.ac-agent.spawned { animation: acSpawn .5s var(--ease-premium); }
+@keyframes acSpawn { 0% { transform: scale(0.82); opacity: .3; } 60% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
+/* retired: merged its work and stood down */
+.ac-agent[data-status="retired"] { opacity: 0.4; }
+.ac-agent[data-status="retired"] .ac-agent-ico, .ac-agent[data-status="retired"] .ac-agent-name { color: var(--dim); }
+.ac-agent[data-status="retired"] .ac-agent-dot { background: transparent; box-shadow: inset 0 0 0 1px var(--dim); animation: none; }
+
+/* retired collaborators stay in the facepile, dimmed */
+.ac-face-retired { opacity: 0.4; filter: grayscale(1); }
+
+/* lifecycle log lines */
+.ac-line.spawn { color: var(--accent-bright); font-weight: 500; }
+.ac-line.merge { color: var(--ink-2); }
+.ac-line.retire { color: var(--dim); }
+@media (prefers-reduced-motion: reduce) { .ac-agent.spawned { animation: none !important; } }
+
+/* ═══════ multiplayer presence, popped out: Wasi directing three agents ═══════ */
+.ac-presence {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 12px; border-bottom: 1px solid var(--hair); flex-shrink: 0;
+  background: rgba(255,255,255,0.035);
+}
+.acp-standby { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dim); }
+.acp-label { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+.acp-agents { display: flex; gap: 6px; justify-content: space-between; flex: 1; min-width: 0; }
+.acp-agent {
+  flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 9px; border: 1px solid var(--hair); border-radius: 6px;
+  background: rgba(255,255,255,0.02); transition: border-color .3s var(--ease-out), background .3s var(--ease-out), box-shadow .3s var(--ease-out);
+  animation: acpPop .45s var(--ease-premium) both;
+}
+.acp-bot { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: #14171c; color: var(--ink-2); box-shadow: 0 0 0 1.5px var(--hair-strong); }
+.acp-bot svg { width: 11px; height: 11px; }
+.acp-agent .acp-name { font-size: 11px; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acp-agent[data-status="active"] { border-color: rgba(255,255,255,0.42); background: rgba(255,255,255,0.07); box-shadow: 0 0 0 1px rgba(255,255,255,0.22); }
+.acp-agent[data-status="active"] .acp-bot { background: #fff; color: #0b0d10; box-shadow: 0 0 9px rgba(255,255,255,0.5); }
+.acp-agent[data-status="active"] .acp-name { color: var(--ink); }
+.acp-agent[data-status="done"] .acp-bot { color: var(--ok); }
+.acp-agent[data-status="done"] .acp-name { color: var(--ink-2); }
+@keyframes acpPop { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .acp-human, .acp-agent { animation: none !important; } }
+
+/* ═══════ multiplayer workspace bar (Google-Docs style: label · people · Share) ═══════ */
+.ac-ws { display: flex; align-items: center; gap: 8px; padding: 11px 12px; border-bottom: 1px solid var(--hair); flex-shrink: 0; }
+.ac-ws-live { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px rgba(70,185,143,0.6); flex-shrink: 0; }
+.ac-ws-live.live { animation: acPulse 1.6s ease-in-out infinite; }
+.ac-ws-label { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.ac-ws-people { display: inline-flex; align-items: center; margin-left: auto; flex-shrink: 0; }
+.ac-face2 {
+  width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-ui); font-size: 10px; font-weight: 700; color: #0b0d10; margin-left: -6px;
+  box-shadow: 0 0 0 2px #0d0f13; animation: acpPop .35s var(--ease-premium);
+}
+.ac-face2:first-child { margin-left: 0; }
+.ac-face2[data-tone="you"] { background: #9db4d6; }
+.ac-face2[data-tone="wasi"] { background: #d6b878; }
+.ac-ws-share {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 7px;
+  border: 1px solid var(--hair-strong); background: rgba(255,255,255,0.05); color: var(--ink);
+  font-family: var(--font-ui); font-size: 11px; font-weight: 500; cursor: default; flex-shrink: 0;
+}
+.ac-ws-share svg { width: 12px; height: 12px; color: var(--ink-2); }
+/* state line under the workspace bar */
+.ac-state { padding: 9px 12px 1px; font-size: 12px; color: var(--ink-2); font-weight: 450; }
+
