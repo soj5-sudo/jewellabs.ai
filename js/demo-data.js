@@ -38,14 +38,14 @@ window.JL_DEMO = {
       key: 'quote',
       teamName: 'Agent Team',
       agentName: 'Quoting Agent',
-      agentSub: 'Wasi and three agents, one shared session, over A2A',
+      agentSub: 'People and three agents in one live workspace',
       account: 'quotes@jewellabs.org',
       feature: 'q1', // worked end to end during the run to reveal the full quote
       cta: { href: 'https://studio.jewellabs.org', label: 'Try the agents yourself' },
       openLine: 'Overnight inbox: 7 threads. Quoting is reading the inbox.',
       closeLines: [
         'Wrapping the run',
-        '5 quotes sent, 2 filtered. Wasi and three agents, one session.',
+        '5 quotes sent, 2 filtered. Two people, three agents, one workspace.',
       ],
       finaleState: '5 quotes sent',
       finale: {
@@ -53,9 +53,9 @@ window.JL_DEMO = {
         stat: '5 of 5',
         statLabel: 'Quote requests answered, unattended',
         rows: [
-          ['In the session', 'Wasi, directing Quoting, Cut, Compliance'],
+          ['In the workspace', 'You and Wasi, plus 3 agents'],
           ['A2A messages', '{a2a} exchanged over the run'],
-          ['Compliance', 'G7 DDS prepared, origin verified'],
+          ['Compliance', 'G7 DDS ready, origin verified'],
         ],
         note: 'Staged demo. Figures indicative. The studio runs the same agents on your own inbox.',
       },

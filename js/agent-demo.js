@@ -90,20 +90,41 @@
   function resetPeople() { people = [{ id: 'you', initial: 'Y', tone: 'you', name: 'You' }]; }
   function renderPeople() {
     if (!els.people) return;
-    els.people.innerHTML = people.map((p) =>
-      '<span class="ac-face2" data-tone="' + p.tone + '" title="' + esc(p.name) + '">' + esc(p.initial) + '</span>').join('');
+    // the last-added face is 'fresh' so only the newcomer pops in
+    els.people.innerHTML = people.map((p, i) =>
+      '<span class="ac-face2' + (i === people.length - 1 ? ' is-fresh' : '') + '" data-tone="' + p.tone + '" title="' + esc(p.name) + '">' + esc(p.initial) + '</span>').join('');
   }
+
+  // a brief "someone joined" toast, the way a shared doc announces presence
+  let toastTimer = null;
+  function showToast(text) {
+    if (!els.toast) return;
+    els.toast.textContent = text;
+    els.toast.classList.remove('show'); void els.toast.offsetWidth; els.toast.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { if (els.toast) els.toast.classList.remove('show'); }, 2300);
+  }
+  function hideToast() { if (els.toast) els.toast.classList.remove('show'); }
+
   // The three agents in the workspace and who is driving them right now.
-  const presence = { wasi: false, agents: false, active: null, done: {} };
-  function resetPresence() { presence.wasi = false; presence.agents = false; presence.active = null; presence.done = {}; }
+  const presence = { wasi: false, agents: false, active: null, done: {}, painted: false };
+  function resetPresence() { presence.wasi = false; presence.agents = false; presence.active = null; presence.done = {}; presence.painted = false; }
   function wasiJoin() {
     if (presence.wasi) return;
     presence.wasi = true;
     people.push({ id: 'wasi', initial: 'W', tone: 'wasi', name: 'Wasi' });
     renderPeople(); renderPresence();
-    addHumanLine('Wasi', 'just joined the workspace');
+    addHumanLine('Wasi', 'joined the workspace');
+    showToast('Wasi joined the workspace');
   }
-  function agentsJoin() { if (presence.agents) return; presence.agents = true; renderPresence(); addLine("Wasi's agents joined: Quoting, Cut, Compliance", 'spawn'); }
+  function agentsJoin() {
+    if (presence.agents) return;
+    presence.agents = true;
+    renderPresence();          // the three agents pop in, staggered
+    presence.painted = true;   // later state changes repaint without re-popping
+    addLine('Quoting, Cut and Compliance joined the workspace', 'spawn');
+    showToast('3 agents joined the workspace');
+  }
   function activate(id) { presence.active = id; renderPresence(); }
   function markDone(id) { presence.done[id] = true; if (presence.active === id) presence.active = null; renderPresence(); }
   function agentsDone() { AGENTS.forEach((a) => { presence.done[a.id] = true; }); presence.active = null; renderPresence(); }
@@ -331,7 +352,7 @@
     els.log.scrollTop = els.log.scrollHeight;
   }
   function setState(s) { els.state.textContent = s; }
-  function setFoot(s) { els.foot.textContent = s; }
+  function setFoot() { /* status now lives in a single line under the workspace bar */ }
   function setCount() { els.count.textContent = unread > 0 ? String(unread) : ''; }
 
   /* ═══════ multi-agent orchestration (A2A) ═══════ */
@@ -382,9 +403,11 @@
       return;
     }
     els.presence.setAttribute('data-live', '1');
-    const agents = AGENTS.map((a) => {
+    const staticCls = presence.painted ? ' acp-static' : '';
+    const agents = AGENTS.map((a, idx) => {
       const st = presence.done[a.id] ? 'done' : (presence.active === a.id ? 'active' : 'idle');
-      return '<span class="acp-agent" data-agent="' + a.id + '" data-status="' + st + '" title="' + esc(a.card.name) + '">' +
+      const delay = presence.painted ? '' : ' style="animation-delay:' + (idx * 190) + 'ms"';
+      return '<span class="acp-agent' + staticCls + '" data-agent="' + a.id + '" data-status="' + st + '" title="' + esc(a.card.name) + '"' + delay + '>' +
         '<span class="acp-bot">' + (I[a.ico] || I.diamond) + '</span>' +
         '<span class="acp-name">' + esc(a.name) + '</span>' +
       '</span>';
@@ -411,7 +434,7 @@
     els.log.innerHTML = '';
     resetApps();
     RUN = newRun(); TASK = newTask(); renderRun(); renderPeople(); renderPresence();
-    setState('Standing by'); setFoot('Standing by');
+    setState('Standing by'); hideToast();
     els.dot.classList.remove('live');
     setCount(); els.range.textContent = '';
     els.avatar.textContent = (sc.account || 'j').charAt(0).toUpperCase();
@@ -577,54 +600,53 @@
     const stone = (e.reply && e.reply.spec && e.reply.spec[0] ? e.reply.spec[0][1] : '');
     const rapDisc = (e.reply && e.reply.rapDiscount) || '';
 
-    // Quoting opens the request and hands the stone to Cut over A2A
-    seq.at(t, () => { activate('quoting'); switchApp('gmail'); startProcess(e); setState('Quoting on ' + who); openEmail(e.id); });
-    seq.at(t + 850, () => a2a('quoting', 'cut', 'plan.request', 'Quoting asks Cut to plan the stone and confirm the make.', { stone: stone, skill: 'plan-rough' }));
+    // 1. Quoting reads the request and asks Cut to plan the stone (Gmail)
+    seq.at(t, () => { activate('quoting'); switchApp('gmail'); startProcess(e); openEmail(e.id); setState('Quoting reads ' + who + "'s request"); });
+    seq.at(t + 900, () => a2a('quoting', 'cut', 'plan.request', 'Quoting asks Cut to plan the stone and confirm the make.', { stone: stone, skill: 'plan-rough' }));
     t += 2100;
 
-    // Cut plans the rough and returns yield + make
-    seq.at(t, () => { activate('cut'); setState('Cut planning the stone'); addLine('Planning the rough: yield and make'); });
-    seq.at(t + 900, () => a2a('cut', 'quoting', 'plan.result', 'Cut confirms the plan: make holds, yield is good.', { make: 'confirmed', yield: 'good', confidence: 0.92 }));
-    t += 1700;
+    // 2. Cut plans the rough
+    seq.at(t, () => { activate('cut'); setState('Cut plans the stone'); addLine('Planning the rough: yield and make'); });
+    seq.at(t + 950, () => a2a('cut', 'quoting', 'plan.result', 'Cut confirms the plan: make holds, yield is good.', { make: 'confirmed', confidence: 0.92 }));
+    t += 1750;
 
-    // Quoting runs the price model itself, back of Rap
-    seq.at(t, () => { activate('quoting'); closeRead(); switchApp('rapaport'); setState('Quoting running the price model'); });
+    // 3. Quoting prices it, back of Rap (Price Model)
+    seq.at(t, () => { activate('quoting'); closeRead(); switchApp('rapaport'); setState('Quoting prices it, back of Rap'); });
     seq.at(t + 600, () => { rapType(rapQueryFor(e)); addTyping(); });
     seq.at(t + 1500, () => { removeTyping(); rapListings(e); addLine('Rapaport and comparables pulled'); });
     seq.at(t + 2200, () => { rapPredict(); addLine('Pricing back of Rap', 'sys'); addTyping(); });
-    seq.at(t + 3400, () => { removeTyping(); rapResolve(e); if (rapDisc) addLine('Priced at ' + rapDisc.replace('-', '') + ' back of Rap', 'ok', true); });
-    t += 4100;
+    seq.at(t + 3300, () => { removeTyping(); rapResolve(e); if (rapDisc) addLine('Fair value at ' + rapDisc.replace('-', '') + ' back of Rap', 'ok', true); });
+    t += 3900;
 
-    // Wasi directs the compliance check; Quoting hands it to Compliance over A2A
-    seq.at(t, () => { switchApp('gmail'); closeRead(); setState('Wasi handing off compliance'); addHumanLine('Wasi', 'sent the origin check to Compliance'); });
-    seq.at(t + 900, () => a2a('quoting', 'compliance', 'dds.request', 'Verify the stone against its GIA report and check origin before the quote goes out.', { report: 'GIA', check: 'origin', skill: 'g7-dds' }));
-    t += 1900;
-
-    // Compliance cross-checks the grading records, verifies origin, prepares the G7 DDS
-    seq.at(t, () => { activate('compliance'); setState('Compliance running the checks'); addLine('Cross-checking the stone against GIA grading records'); });
-    seq.at(t + 1100, () => addLine('Origin verified, no mismatch. G7 DDS prepared.', 'ok', true));
-    seq.at(t + 1500, () => a2a('compliance', 'quoting', 'dds.result', 'Stone matches the GIA report, origin clean, G7 Due Diligence Statement ready.', { matched: true, origin: 'verified', statement: 'G7-DDS' }));
+    // 4. Quoting asks Compliance to check origin; Compliance builds the G7 DDS
+    seq.at(t, () => { activate('quoting'); switchApp('gmail'); setState('Quoting asks Compliance to check origin'); });
+    seq.at(t + 600, () => a2a('quoting', 'compliance', 'dds.request', 'Check this stone against its GIA report and confirm origin before the quote goes out.', { report: 'GIA', check: 'origin', skill: 'g7-dds' }));
+    t += 1500;
+    seq.at(t, () => { activate('compliance'); setState('Compliance checks origin'); addLine('Cross-checking the stone against GIA grading records'); });
+    seq.at(t + 1100, () => addLine('Origin verified, no mismatch. G7 DDS ready.', 'ok', true));
+    seq.at(t + 1500, () => a2a('compliance', 'quoting', 'dds.result', 'Stone matches GIA, origin clean, G7 Due Diligence Statement ready.', { matched: true, origin: 'verified', statement: 'G7-DDS' }));
     t += 2300;
 
-    // Quoting assembles the quote and notifies the owner in Slack itself
-    seq.at(t, () => { activate('quoting'); switchApp('gmail'); setState('Quoting building the quote'); });
+    // 5. Quoting builds the quote
+    seq.at(t, () => { activate('quoting'); setState('Quoting builds the quote'); });
     seq.at(t + 300, () => addLine('Rendered the piece, metal at spot'));
     seq.at(t + 1100, () => addLine('Margin checked against budget', 'ok', true));
     t += 1900;
 
+    // 6. Quoting notifies the owner (Slack)
     const order = 'JL-' + (1042 + idx);
     const smsg = 'Quote ready. ' + who + ', order #' + order + ', ' + price + ' indicative.';
-    seq.at(t, () => { activate('quoting'); switchApp('slack'); slackReset(); setState('Quoting messaging the owner'); });
+    seq.at(t, () => { activate('quoting'); switchApp('slack'); slackReset(); setState('Quoting notifies the owner'); });
     let tc = t + 500;
     for (let c = 0; c < smsg.length; c++) { const ch = smsg.charAt(c); seq.at(tc, () => slackTypeChar(ch)); tc += 40; }
     seq.at(tc + 260, () => addTyping());
-    seq.at(tc + 700, () => { removeTyping(); slackSendMsg(e, smsg); setState('Owner notified'); addLine('Owner notified in Slack', 'ok', true); });
-    t = tc + 700 + 1500; // ~2s hold on the delivered message
+    seq.at(tc + 700, () => { removeTyping(); slackSendMsg(e, smsg); setState('Owner notified in Slack'); addLine('Owner notified in Slack', 'ok', true); });
+    t = tc + 700 + 1400;
 
-    // Quoting sends the reply to the client
-    seq.at(t, () => { activate('quoting'); switchApp('gmail'); finishProcess(e, idx, sc); openEmail(e.id); setState('Reply sent to ' + who); addLine('Reply sent, indicative ' + price, 'done', true); });
-    seq.at(t + 2700, () => { closeRead(); setState('Working the queue'); });
-    t += 3000;
+    // 7. Quoting replies to the client (Gmail)
+    seq.at(t, () => { activate('quoting'); switchApp('gmail'); finishProcess(e, idx, sc); openEmail(e.id); setState('Quote sent to ' + who); addLine('Reply sent, indicative ' + price, 'done', true); });
+    seq.at(t + 2600, () => { closeRead(); setState('Clearing the rest of the queue'); });
+    t += 2900;
 
     return t;
   }
@@ -646,19 +668,20 @@
     // inbox fills with everything: quote requests and noise
     sc.emails.forEach((e, i) => { seq.at(t, () => arrive(e, i, sc)); t += 300; });
     t += 250;
-    // Wasi opens the session; the scheduled run fires and the Task starts working
-    seq.at(t, () => { wasiJoin(); setState('Wasi joined the session'); });
-    t += 900;
+    // 1. A person, Wasi, joins the shared workspace (pop + toast)
+    seq.at(t, () => { els.dot.classList.add('live'); wasiJoin(); setState('Wasi joined the workspace'); });
+    t += 1600;
+    // 2. The scheduled run fires; three AI agents join, one by one
     seq.at(t, () => {
-      els.dot.classList.add('live'); setTaskState('working');
-      agentsJoin(); setState("Wasi's agents on the desk");
+      setTaskState('working');
+      agentsJoin(); setState('Three agents joined the workspace');
       a2a('scheduler', 'quoting', 'run.dispatch', 'Scheduled run fired, inbox polled. ' + sc.emails.length + ' new threads.',
         { trigger: 'schedule', cron: '0 2 * * *', threads: sc.emails.length });
     });
-    t += 1050;
+    t += 1700;
 
-    // Quoting reads the inbox and sets aside the non-quotes itself
-    seq.at(t, () => { activate('quoting'); switchApp('gmail'); setState('Quoting reading the inbox'); addLine('Reading the inbox, setting aside non-quotes'); addTyping(); });
+    // 3. Quoting reads the inbox and sets aside the non-quotes
+    seq.at(t, () => { activate('quoting'); switchApp('gmail'); setState('Quoting reads the inbox'); addLine('Reading the inbox, setting aside non-quotes'); addTyping(); });
     t += 700;
     noise.forEach((e) => {
       seq.at(t, () => { removeTyping(); startProcess(e); });
@@ -718,7 +741,6 @@
     a2a('quoting', 'compliance', 'dds.request', 'Stones cross-checked against grading records, origin verified.', { skill: 'g7-dds' });
     a2a('compliance', 'quoting', 'dds.result', 'Origin clean, G7 Due Diligence Statement prepared.', { statement: 'G7-DDS' });
     setTaskState('completed'); if (RUN) { RUN.status = 'COMPLETED'; renderRun(); }
-    addHumanLine('Wasi', 'reviewed the run in the shared session');
     addLine(sc.closeLines[1], 'done', true);
     showFinale(sc);
     els.log.scrollTop = els.log.scrollHeight;
@@ -745,7 +767,7 @@
     els = {
       stage: $('theaterStage'), list: $('gmList'), read: $('gmRead'),
       finale: $('theaterFinale'), log: $('acLog'), people: $('acPeople'),
-      state: $('acState'), foot: $('acFoot'), dot: $('acDot'),
+      state: $('acState'), toast: $('acToast'), dot: $('acDot'),
       count: $('gmCount'), range: $('gmRange'), avatar: $('gmAvatar'),
       label: $('gmLabel'), cta: $('demoCTA'), skip: $('demoSkip'),
       replay: $('demoReplay'), presence: $('acPresence'), run: $('acRun'),
