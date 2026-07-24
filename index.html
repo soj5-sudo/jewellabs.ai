@@ -35,9 +35,9 @@
   <meta name="twitter:image:alt" content="Jewel Labs: Agentic AI infrastructure for the diamond, jewelry, and rare-metal trade" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=31" />
-  <link rel="stylesheet" href="agent-demo.css?v=18" />
+  <link rel="stylesheet" href="agent-demo.css?v=20" />
   <link rel="stylesheet" href="chat.css?v=2" />
 
   <!-- Structured data for search + AI answer engines (GEO) -->
@@ -261,7 +261,7 @@
 
     <!-- ─── BACKERS MARQUEE (koovai-style) ─── -->
     <section class="marquee-section" aria-label="Trade shows and clients">
-      <p class="marquee-eyebrow">Featured and working with clients at shows</p>
+      <p class="marquee-eyebrow">Working with clients at the trade's major shows</p>
 
       <!-- tiny high-quality flag symbols, referenced by the show list below -->
       <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -346,7 +346,7 @@
       <div class="section__head" data-anim="fade-up">
         <p class="eyebrow">The Platform</p>
         <h2 class="section__title">One layer. Four systems.<br/><em>Built only for jewellers.</em></h2>
-        <p class="section__sub">No fragmented tools. A single private layer of agents that handles the work a modern maison can't do by hand.</p>
+        <p class="section__sub">One private layer of agents for the work a jewelry house can't do by hand.</p>
       </div>
 
       <div class="pillars">
@@ -370,7 +370,7 @@
           <div class="card__icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 13h6M10 16.5h6"/></svg>
           </div>
-          <h3 class="card__title">G7 / EU DDS Engine</h3>
+          <h3 class="card__title">G7 / EU Compliance Engine</h3>
           <p class="card__desc">Forward the invoice. The agent extracts the fields, validates them, and returns a signed Due Diligence Statement. No manual entry.</p>
         </article>
 
@@ -392,8 +392,8 @@
           <p class="eyebrow">Compliance-first</p>
           <h2 class="section__title">The G7 deadline is<br/><em>already here.</em></h2>
           <p class="section__sub spotlight__lead">
-            From January 2026, every diamond over 0.5 carats entering G7 markets requires a
-            documented Due Diligence Statement. Most houses still do this by hand. Our compliance
+            Since January 2026, every diamond over 0.5 carats entering G7 markets has required a
+            Due Diligence Statement. Most houses still do this by hand. Our compliance
             agent runs it end to end: invoice in, signed PDF out, audit trail kept.
           </p>
           <ul class="spotlight__list">
@@ -423,9 +423,9 @@
     <!-- ─── AGENT THEATER (the quoting agent, live) ─── -->
     <section class="theater" id="theater" aria-label="Quoting agent demo, replay of a nightly run">
       <div class="section__head" data-anim="fade-up">
-        <p class="eyebrow">Replay of a nightly run · Multiplayer workspace</p>
+        <p class="eyebrow">Staged demo · Multiplayer workspace</p>
         <h2 class="section__title theater-title">AI agents that do<br/><em>the work for you.</em></h2>
-        <p class="section__sub">Like Google Docs for the trade: your team shares one live workspace while three agents hand the work between them.</p>
+        <p class="section__sub">Like Google Docs for the trade: your whole desk shares one live workspace and the same three agents.</p>
       </div>
 
       <div class="theater-stage" id="theaterStage" data-anim="fade-up" data-delay="120">
@@ -556,11 +556,11 @@
           </div>
           <div class="infra-item">
             <span class="infra-k">Multi-agent</span>
-            <span class="infra-v">The agents hand work to each other over the open A2A protocol. Open any message to read the wire.</span>
+            <span class="infra-v">The agents pass work to each other over A2A, an open agent-to-agent standard. Open any message to see the raw handoff.</span>
           </div>
           <div class="infra-item">
             <span class="infra-k">One engine</span>
-            <span class="infra-v">A rule book per trade. Models trained on millions of graded diamonds and the G7 record.</span>
+            <span class="infra-v">A rule book per trade. Pricing models grounded in graded-stone data and the G7 sourcing rules.</span>
           </div>
         </div>
       </div>
@@ -571,7 +571,7 @@
           <button class="btn btn--ghost btn--sm hidden" id="demoReplay" type="button">Replay</button>
           <a class="sol-tool-link" id="demoCTA" href="https://studio.jewellabs.org" target="_blank" rel="noopener noreferrer">Try it yourself</a>
         </div>
-        <a class="btn btn--primary" id="tryStudioBtn" href="https://studio.jewellabs.org" target="_blank" rel="noopener noreferrer">Try It Yourself →</a>
+        <a class="btn btn--primary" id="tryStudioBtn" href="https://studio.jewellabs.org" target="_blank" rel="noopener noreferrer">Try the Studio →</a>
       </div>
     </section>
 
@@ -583,6 +583,7 @@
         <div class="studio__top">
           <p class="eyebrow">Live Operations</p>
           <h2 class="studio__title">Rebuild the house.</h2>
+          <p class="studio__sub">The Studio runs the same agents on your own inbox.</p>
         </div>
 
         <div class="studio__bottom">
@@ -603,7 +604,7 @@
         <div class="step">
           <span class="step__num">01</span>
           <h4 class="step__title">Discovery</h4>
-          <p class="step__desc">A working call. We map the surface of your business: the calls, the invoices, the designs, the bottlenecks.</p>
+          <p class="step__desc">One working call. We map the calls, invoices, designs, and bottlenecks.</p>
         </div>
         <div class="step">
           <span class="step__num">02</span>
@@ -618,7 +619,7 @@
         <div class="step">
           <span class="step__num">04</span>
           <h4 class="step__title">Operate</h4>
-          <p class="step__desc">Maintenance, uptime, iteration. One point of contact. One monthly statement. One trusted partner.</p>
+          <p class="step__desc">Maintenance, uptime, iteration. One point of contact, one monthly statement.</p>
         </div>
       </div>
     </section>
@@ -675,8 +676,8 @@
       });
     };
   </script>
-  <script src="js/demo-data.js?v=10"></script>
-  <script src="js/agent-demo.js?v=22"></script>
+  <script src="js/demo-data.js?v=14"></script>
+  <script src="js/agent-demo.js?v=25"></script>
   <script>
     (function () {
       var t = document.getElementById('theater');

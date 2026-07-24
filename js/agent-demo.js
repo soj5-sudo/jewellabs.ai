@@ -118,6 +118,14 @@
     addHumanLine('Wasi', 'joined the workspace');
     showToast('Wasi joined the workspace');
   }
+  // a second teammate joins the same workspace and works the same shared agents
+  function priyaJoin() {
+    if (people.some(function (p) { return p.id === 'priya'; })) return;
+    people.push({ id: 'priya', initial: 'P', tone: 'priya', name: 'Priya' });
+    renderPeople();
+    addHumanLine('Priya', 'joined the workspace');
+    showToast('Priya joined the workspace');
+  }
   function agentsJoin() {
     if (presence.agents) return;
     presence.agents = true;
@@ -227,7 +235,7 @@
       ? '<div class="gm-reply-photo"><img src="' + r.img + '" loading="lazy" alt="Render, ' + esc(e.subject) + '"><span class="gm-reply-tag">' + I.diamond + 'Render composed by the agent</span></div>'
       : '';
     const inner = '<p>' + esc(r.intro) + '</p>' + img + priceBasisHTML(r.priceBasis) + specRowsHTML(r.spec) +
-      '<p class="gm-reply-note">Indicative figure. The final quote prices at live metal spot and confirmed stone selection.</p>';
+      '<p class="gm-reply-note">Indicative. The final quote uses live metal prices and the confirmed stone.</p>';
     return '<div class="gm-reply">' +
       '<div class="gm-read-head">' +
       '<span class="gm-read-ava">' + I.diamond + '</span>' +
@@ -387,7 +395,7 @@
   function renderRun() {
     if (!els.run || !RUN || !TASK) return;
     els.run.innerHTML =
-      '<span class="ac-run-sched">' + (I.clock || '') + '<span>nightly &middot; ' + esc(RUN.trigger.cron) + ' UTC</span></span>' +
+      '<span class="ac-run-sched">' + (I.clock || '') + '<span>nightly &middot; 2:00 AM UTC</span></span>' +
       '<span class="ac-run-task" data-state="' + esc(TASK.status.state) + '">' + esc(TASK.status.state) + '</span>' +
       '<span class="ac-run-count">' + RUN.a2a + ' A2A</span>';
   }
@@ -612,7 +620,7 @@
     t += 1750;
 
     // 3. Quoting prices it, back of Rap (Price Model)
-    seq.at(t, () => { activate('quoting'); closeRead(); switchApp('rapaport'); setState('Quoting prices it, back of Rap'); });
+    seq.at(t, () => { activate('quoting'); closeRead(); switchApp('rapaport'); setState('Quoting prices it against the Rapaport list'); });
     seq.at(t + 600, () => { rapType(rapQueryFor(e)); addTyping(); });
     seq.at(t + 1500, () => { removeTyping(); rapListings(e); addLine('Rapaport and comparables pulled'); });
     seq.at(t + 2200, () => { rapPredict(); addLine('Pricing back of Rap', 'sys'); addTyping(); });
@@ -626,7 +634,8 @@
     seq.at(t, () => { activate('compliance'); setState('Compliance checks origin'); addLine('Cross-checking the stone against GIA grading records'); });
     seq.at(t + 1100, () => addLine('Origin verified, no mismatch. G7 DDS ready.', 'ok', true));
     seq.at(t + 1500, () => a2a('compliance', 'quoting', 'dds.result', 'Stone matches GIA, origin clean, G7 Due Diligence Statement ready.', { matched: true, origin: 'verified', statement: 'G7-DDS' }));
-    t += 2300;
+    seq.at(t + 2050, () => addHumanLine('Priya', 'signed off on the origin check'));
+    t += 2700;
 
     // 5. Quoting builds the quote; Wasi reviews it before it goes out
     seq.at(t, () => { activate('quoting'); setState('Quoting builds the quote'); });
@@ -670,13 +679,16 @@
     // inbox fills with everything: quote requests and noise
     sc.emails.forEach((e, i) => { seq.at(t, () => arrive(e, i, sc)); t += 300; });
     t += 250;
-    // 1. A person, Wasi, joins the shared workspace (pop + toast)
+    // 1. The desk manager joins the shared workspace (pop + toast)
     seq.at(t, () => { els.dot.classList.add('live'); wasiJoin(); setState('Wasi joined the workspace'); });
-    t += 1600;
-    // 2. The scheduled run fires; three AI agents join, one by one
+    t += 1450;
+    // 2. A second teammate, Priya, joins the same workspace
+    seq.at(t, () => { priyaJoin(); setState('Priya joined the workspace'); });
+    t += 1450;
+    // 3. The scheduled run fires; the three shared agents join, one by one
     seq.at(t, () => {
       setTaskState('working');
-      agentsJoin(); setState('Three agents joined the workspace');
+      agentsJoin(); setState('Three shared agents joined the workspace');
       a2a('scheduler', 'quoting', 'run.dispatch', 'Scheduled run fired, inbox polled. ' + sc.emails.length + ' new threads.',
         { trigger: 'schedule', cron: '0 2 * * *', threads: sc.emails.length });
     });
@@ -736,12 +748,13 @@
     if (empty) empty.remove();
     unread = 0; setCount();
     els.range.textContent = quotes.length + ' quoted';
-    wasiJoin(); agentsJoin(); agentsDone(); setTaskState('working');
+    wasiJoin(); priyaJoin(); agentsJoin(); agentsDone(); setTaskState('working');
     a2a('scheduler', 'quoting', 'run.dispatch', 'Scheduled run fired, inbox polled. ' + sc.emails.length + ' new threads.', { trigger: 'schedule', cron: '0 2 * * *' });
     a2a('quoting', 'cut', 'plan.request', 'Rough-cut plan requested for each piece.', { skill: 'plan-rough' });
     a2a('cut', 'quoting', 'plan.result', 'Plans confirmed, make holds.', { make: 'confirmed' });
     a2a('quoting', 'compliance', 'dds.request', 'Stones cross-checked against grading records, origin verified.', { skill: 'g7-dds' });
     a2a('compliance', 'quoting', 'dds.result', 'Origin clean, G7 Due Diligence Statement prepared.', { statement: 'G7-DDS' });
+    addHumanLine('Priya', 'signed off on origin'); addHumanLine('Wasi', 'cleared the quote to send');
     setTaskState('completed'); if (RUN) { RUN.status = 'COMPLETED'; renderRun(); }
     addLine(sc.closeLines[1], 'done', true);
     showFinale(sc);
