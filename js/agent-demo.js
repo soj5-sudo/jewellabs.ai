@@ -119,12 +119,12 @@
     showToast('Wasi joined the workspace');
   }
   // a second teammate joins the same workspace and works the same shared agents
-  function priyaJoin() {
-    if (people.some(function (p) { return p.id === 'priya'; })) return;
-    people.push({ id: 'priya', initial: 'P', tone: 'priya', name: 'Priya' });
+  function sohamJoin() {
+    if (people.some(function (p) { return p.id === 'soham'; })) return;
+    people.push({ id: 'soham', initial: 'S', tone: 'soham', name: 'Soham' });
     renderPeople();
-    addHumanLine('Priya', 'joined the workspace');
-    showToast('Priya joined the workspace');
+    addHumanLine('Soham', 'joined the workspace');
+    showToast('Soham joined the workspace');
   }
   function agentsJoin() {
     if (presence.agents) return;
@@ -634,7 +634,7 @@
     seq.at(t, () => { activate('compliance'); setState('Compliance checks origin'); addLine('Cross-checking the stone against GIA grading records'); });
     seq.at(t + 1100, () => addLine('Origin verified, no mismatch. G7 DDS ready.', 'ok', true));
     seq.at(t + 1500, () => a2a('compliance', 'quoting', 'dds.result', 'Stone matches GIA, origin clean, G7 Due Diligence Statement ready.', { matched: true, origin: 'verified', statement: 'G7-DDS' }));
-    seq.at(t + 2050, () => addHumanLine('Priya', 'signed off on the origin check'));
+    seq.at(t + 2050, () => addHumanLine('Soham', 'signed off on the origin check'));
     t += 2700;
 
     // 5. Quoting builds the quote; Wasi reviews it before it goes out
@@ -682,8 +682,8 @@
     // 1. The desk manager joins the shared workspace (pop + toast)
     seq.at(t, () => { els.dot.classList.add('live'); wasiJoin(); setState('Wasi joined the workspace'); });
     t += 1450;
-    // 2. A second teammate, Priya, joins the same workspace
-    seq.at(t, () => { priyaJoin(); setState('Priya joined the workspace'); });
+    // 2. A second teammate, Soham, joins the same workspace
+    seq.at(t, () => { sohamJoin(); setState('Soham joined the workspace'); });
     t += 1450;
     // 3. The scheduled run fires; the three shared agents join, one by one
     seq.at(t, () => {
@@ -748,13 +748,13 @@
     if (empty) empty.remove();
     unread = 0; setCount();
     els.range.textContent = quotes.length + ' quoted';
-    wasiJoin(); priyaJoin(); agentsJoin(); agentsDone(); setTaskState('working');
+    wasiJoin(); sohamJoin(); agentsJoin(); agentsDone(); setTaskState('working');
     a2a('scheduler', 'quoting', 'run.dispatch', 'Scheduled run fired, inbox polled. ' + sc.emails.length + ' new threads.', { trigger: 'schedule', cron: '0 2 * * *' });
     a2a('quoting', 'cut', 'plan.request', 'Rough-cut plan requested for each piece.', { skill: 'plan-rough' });
     a2a('cut', 'quoting', 'plan.result', 'Plans confirmed, make holds.', { make: 'confirmed' });
     a2a('quoting', 'compliance', 'dds.request', 'Stones cross-checked against grading records, origin verified.', { skill: 'g7-dds' });
     a2a('compliance', 'quoting', 'dds.result', 'Origin clean, G7 Due Diligence Statement prepared.', { statement: 'G7-DDS' });
-    addHumanLine('Priya', 'signed off on origin'); addHumanLine('Wasi', 'cleared the quote to send');
+    addHumanLine('Soham', 'signed off on origin'); addHumanLine('Wasi', 'cleared the quote to send');
     setTaskState('completed'); if (RUN) { RUN.status = 'COMPLETED'; renderRun(); }
     addLine(sc.closeLines[1], 'done', true);
     showFinale(sc);

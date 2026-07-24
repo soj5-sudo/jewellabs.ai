@@ -1384,7 +1384,7 @@
 .ac-face2:first-child { margin-left: 0; }
 .ac-face2[data-tone="you"] { background: #9db4d6; }
 .ac-face2[data-tone="wasi"] { background: #d6b878; }
-.ac-face2[data-tone="priya"] { background: #b8a6d0; }
+.ac-face2[data-tone="soham"] { background: #b8a6d0; }
 .ac-ws-share {
   display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 7px;
   border: 1px solid var(--hair-strong); background: rgba(255,255,255,0.05); color: var(--ink);

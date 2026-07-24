@@ -53,7 +53,7 @@ window.JL_DEMO = {
         stat: '5 of 5',
         statLabel: 'Quote requests answered, unattended',
         rows: [
-          ['In the workspace', 'You, Wasi and Priya, on the same 3 agents'],
+          ['In the workspace', 'You, Wasi and Soham, on the same 3 agents'],
           ['Agent messages', '{a2a} passed between the agents'],
           ['Delivered', '5 quote replies, one due diligence statement, origin verified'],
         ],
