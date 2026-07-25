@@ -55,7 +55,7 @@ window.JL_DEMO = {
         rows: [
           ['In the workspace', 'You, Wasi and Soham, on the same 3 agents'],
           ['Agent messages', '{a2a} passed between the agents'],
-          ['Delivered', '5 quote replies, one due diligence statement, origin verified'],
+          ['Delivered', '5 quote replies, a due diligence statement, full audit trail'],
         ],
         note: 'Staged demo. Figures indicative. The studio runs the same agents on your own inbox.',
       },
