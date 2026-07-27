@@ -9,7 +9,7 @@
 
   var ENDPOINT = '/api/chat';
   var BOOK = 'https://cal.com/soham-jariwala-4fvbkw/15min';
-  var STUDIO = 'https://studio.jewellabs.org';
+  var STUDIO = 'https://studio.jewellabs.io';
   var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var GREETING = 'Hi, I am the Jewel Labs assistant. Ask me anything about what we build for the jewelry, diamond, and rare-metal trade, or how we work with new clients and investors.';

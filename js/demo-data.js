@@ -39,9 +39,9 @@ window.JL_DEMO = {
       teamName: 'Agent Team',
       agentName: 'Quoting Agent',
       agentSub: 'People and three agents in one live workspace',
-      account: 'quotes@jewellabs.org',
+      account: 'quotes@jewellabs.io',
       feature: 'q1', // worked end to end during the run to reveal the full quote
-      cta: { href: 'https://studio.jewellabs.org', label: 'Run this on your own inbox' },
+      cta: { href: 'https://studio.jewellabs.io', label: 'Run this on your own inbox' },
       openLine: 'Overnight inbox: 7 threads. Quoting is reading the inbox.',
       closeLines: [
         'Wrapping the run',

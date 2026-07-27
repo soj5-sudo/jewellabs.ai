@@ -39,17 +39,17 @@
   const AGENTS = [
     { id: 'quoting', name: 'Quoting', ico: 'diamond', card: {
       name: 'Quoting Agent', description: 'Runs the desk: reads the inbox, prices back of Rap, builds the quote, notifies the owner.',
-      url: 'https://studio.jewellabs.org/a2a/quoting', version: '2.0.1', protocolVersion: A2A_PROTO,
+      url: 'https://studio.jewellabs.io/a2a/quoting', version: '2.0.1', protocolVersion: A2A_PROTO,
       preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: true },
       skills: [{ id: 'compose-quote', name: 'Compose quote', tags: ['render', 'price', 'quote'] }] } },
     { id: 'cut', name: 'Cut', ico: 'cut', card: {
       name: 'Rough-Cut Planning Agent', description: 'Plans the rough stone: yield, make, and cut layout, trained on scan data.',
-      url: 'https://studio.jewellabs.org/a2a/cut', version: '1.3.0', protocolVersion: A2A_PROTO,
+      url: 'https://studio.jewellabs.io/a2a/cut', version: '1.3.0', protocolVersion: A2A_PROTO,
       preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: false, stateTransitionHistory: true },
       skills: [{ id: 'plan-rough', name: 'Plan rough', tags: ['rough-cut', 'yield'] }] } },
     { id: 'compliance', name: 'Compliance', ico: 'shield', card: {
       name: 'Compliance Agent', description: 'Cross-checks stones against grading-lab records, verifies origin, produces the G7 Due Diligence Statement.',
-      url: 'https://studio.jewellabs.org/a2a/compliance', version: '2.1.0', protocolVersion: A2A_PROTO,
+      url: 'https://studio.jewellabs.io/a2a/compliance', version: '2.1.0', protocolVersion: A2A_PROTO,
       preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: true },
       skills: [{ id: 'g7-dds', name: 'G7 Due Diligence Statement', tags: ['compliance', 'origin', 'g7'] }] } },
   ];
@@ -506,7 +506,7 @@
   }
 
   /* ═══════ multi-app workspace (gmail / rapaport / slack) ═══════ */
-  const APP_URL = { gmail: 'mail.google.com', rapaport: 'studio.jewellabs.org/price-model', slack: 'jewellabs.slack.com' };
+  const APP_URL = { gmail: 'mail.google.com', rapaport: 'studio.jewellabs.io/price-model', slack: 'jewellabs.slack.com' };
 
   function switchApp(app) {
     if (!apps || !apps.screens) return;
