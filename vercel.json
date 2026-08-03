@@ -2,9 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "has": [{ "type": "host", "value": { "re": "^(www\\.)?jewellabs\\.org$" } }],
-      "destination": "https://jewellabs.io/:path*",
+      "destination": "https://jewellabs.io/$1",
       "permanent": true
     }
   ]
