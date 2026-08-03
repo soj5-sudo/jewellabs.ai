@@ -3,7 +3,7 @@
   "redirects": [
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "^(www\\.)?jewellabs\\.org$" }],
+      "has": [{ "type": "host", "value": { "re": "^(www\\.)?jewellabs\\.org$" } }],
       "destination": "https://jewellabs.io/:path*",
       "permanent": true
     }
