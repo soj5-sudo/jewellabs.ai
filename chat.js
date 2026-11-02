@@ -13,7 +13,7 @@
   var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var GREETING = 'Hi, I am the Jewel Labs assistant. Ask me anything about what we build for the jewelry, diamond, and rare-metal trade, or how we work with new clients and investors.';
-  var CHIPS = ['What does Jewel Labs do?', 'How do you handle G7 compliance?', 'Who is on the team?', 'How do we get started?'];
+  var CHIPS = ['What does Jewel Labs do?', 'How do you handle EU compliance?', 'Who is on the team?', 'How do we get started?'];
 
   // ── built-in fallback (used only if /api/chat is unreachable) ──
   function localAnswer(q) {
@@ -27,7 +27,7 @@
     if (has('voice', 'call', 'phone', 'inbound', 'receptionist'))
       return 'Our AI voice agents answer every inbound call, hold a natural conversation, qualify the lead and capture intent, then drop a structured summary in your inbox. No call goes to voicemail.';
     if (has('compliance', 'g7', 'dds', 'due diligence', 'tax', 'customs', 'vat', 'provenance', 'kimberley'))
-      return 'We turn compliance into a workflow: invoice in, signed Due Diligence Statement out, audit trail kept. It covers cross-border customs, localized VAT, and G7 sourcing rules, with missing-data flags routed for human review.';
+      return 'We turn compliance into a workflow: one upload in, a signed filing out, audit trail kept. The EU needs a Due Diligence Statement, the US a CBP self-certification, same data a different filing per country. The house only signs.';
     if (has('design', 'render', 'cad', 'concept', 'archive'))
       return 'Our private design AI takes a description or a rough layout and returns studio-grade renders, bench specs, and channel-ready copy. It is trained on your archive and your IP never leaves your tenancy.';
     if (has('diamond planning', 'rough', 'cut', 'yield', 'carat', 'planning'))
@@ -49,8 +49,8 @@
     if (has('hi', 'hello', 'hey', 'yo '))
       return GREETING;
     if (has('what', 'do you', 'services', 'offer', 'help'))
-      return 'Jewel Labs builds dedicated AI infrastructure for the jewelry, diamond, and rare-metal trade: bespoke storefronts, AI voice agents, G7 compliance automation, private design AI, and custom fine-tuned models. Which of those is most relevant to you?';
-    return 'I can walk you through our storefronts, AI voice agents, G7 compliance automation, design AI, the team, or how we start with a new client. What would you like to know? You can also book a demo: ' + BOOK;
+      return 'Jewel Labs builds dedicated AI infrastructure for the jewelry, diamond, and rare-metal trade: bespoke storefronts, AI voice agents, EU and US compliance automation, private design AI, and custom fine-tuned models. Which of those is most relevant to you?';
+    return 'I can walk you through our storefronts, AI voice agents, EU and US compliance automation, design AI, the team, or how we start with a new client. What would you like to know? You can also book a demo: ' + BOOK;
   }
 
   // ── DOM build ──

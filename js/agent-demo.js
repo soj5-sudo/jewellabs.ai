@@ -48,10 +48,10 @@
       preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: false, stateTransitionHistory: true },
       skills: [{ id: 'plan-rough', name: 'Plan rough', tags: ['rough-cut', 'yield'] }] } },
     { id: 'compliance', name: 'Compliance', ico: 'shield', card: {
-      name: 'Compliance Agent', description: 'Cross-checks stones against grading-lab records, verifies origin, produces the G7 Due Diligence Statement.',
+      name: 'Compliance Agent', description: 'Cross-checks stones against grading-lab records, verifies origin, files the EU Due Diligence Statement and the US self-certification.',
       url: 'https://studio.jewellabs.io/a2a/compliance', version: '2.1.0', protocolVersion: A2A_PROTO,
       preferredTransport: 'JSONRPC', capabilities: { streaming: true, pushNotifications: true, stateTransitionHistory: true },
-      skills: [{ id: 'g7-dds', name: 'G7 Due Diligence Statement', tags: ['compliance', 'origin', 'g7'] }] } },
+      skills: [{ id: 'eu-dds', name: 'EU Due Diligence Statement', tags: ['compliance', 'origin', 'eu'] }] } },
   ];
   const AGENT = {}; AGENTS.forEach((a) => { AGENT[a.id] = a; });
   AGENT.scheduler = { id: 'scheduler', name: 'Scheduler' }; // the cron trigger (not an agent)
@@ -627,13 +627,13 @@
     seq.at(t + 3300, () => { removeTyping(); rapResolve(e); if (rapDisc) addLine('Fair value at ' + rapDisc.replace('-', '') + ' back of Rap', 'ok', true); });
     t += 3900;
 
-    // 4. Quoting asks Compliance to check origin; Compliance builds the G7 DDS
+    // 4. Quoting asks Compliance to check origin; Compliance builds the EU DDS
     seq.at(t, () => { activate('quoting'); switchApp('gmail'); setState('Quoting asks Compliance to check origin'); });
     seq.at(t + 600, () => a2a('quoting', 'compliance', 'dds.request', 'Check this stone against its GIA report and confirm origin before the quote goes out.', { report: 'GIA', check: 'origin', skill: 'g7-dds' }));
     t += 1500;
     seq.at(t, () => { activate('compliance'); setState('Compliance checks origin'); addLine('Cross-checking the stone against GIA grading records'); });
-    seq.at(t + 1100, () => addLine('Origin verified, no mismatch. G7 DDS ready.', 'ok', true));
-    seq.at(t + 1500, () => a2a('compliance', 'quoting', 'dds.result', 'Stone matches GIA, origin clean, G7 Due Diligence Statement ready.', { matched: true, origin: 'verified', statement: 'G7-DDS' }));
+    seq.at(t + 1100, () => addLine('Origin verified, no mismatch. EU DDS ready.', 'ok', true));
+    seq.at(t + 1500, () => a2a('compliance', 'quoting', 'dds.result', 'Stone matches GIA, origin clean, EU Due Diligence Statement ready.', { matched: true, origin: 'verified', statement: 'EU-DDS' }));
     seq.at(t + 2050, () => addHumanLine('Soham', 'signed off on the origin check'));
     t += 2700;
 
@@ -753,7 +753,7 @@
     a2a('quoting', 'cut', 'plan.request', 'Rough-cut plan requested for each piece.', { skill: 'plan-rough' });
     a2a('cut', 'quoting', 'plan.result', 'Plans confirmed, make holds.', { make: 'confirmed' });
     a2a('quoting', 'compliance', 'dds.request', 'Stones cross-checked against grading records, origin verified.', { skill: 'g7-dds' });
-    a2a('compliance', 'quoting', 'dds.result', 'Origin clean, G7 Due Diligence Statement prepared.', { statement: 'G7-DDS' });
+    a2a('compliance', 'quoting', 'dds.result', 'Origin clean, EU Due Diligence Statement prepared.', { statement: 'EU-DDS' });
     addHumanLine('Soham', 'signed off on origin'); addHumanLine('Wasi', 'cleared the quote to send');
     setTaskState('completed'); if (RUN) { RUN.status = 'COMPLETED'; renderRun(); }
     addLine(sc.closeLines[1], 'done', true);
