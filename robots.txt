@@ -1,4 +1,4 @@
-# Jewel Labs — jewellabs.org
+# Jewel Labs, jewellabs.io
 # Search + AI answer engines are welcome to crawl and cite this site.
 
 User-agent: *
@@ -38,4 +38,4 @@ Allow: /
 User-agent: cohere-ai
 Allow: /
 
-Sitemap: https://jewellabs.org/sitemap.xml
+Sitemap: https://jewellabs.io/sitemap.xml
